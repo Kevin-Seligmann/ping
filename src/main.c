@@ -1,7 +1,12 @@
 #include "ft_ping.h"
 
-int main()
+int main(int argc, char **argv)
 {
-	printf("Hello, World\n");
+	static struct s_config input;
+
+	parse(argc, argv, &input);
+	
+	ping(&input);
+
 	return 0;
 }

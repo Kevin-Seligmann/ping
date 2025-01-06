@@ -1,7 +1,7 @@
-VPATH = src
+VPATH = src src/parsing
 
 # Files
-OBJ = main.o
+OBJ = main.o parsing.o ping.o print.o
 
 # Target
 NAME = ft_ping
@@ -22,7 +22,7 @@ DEPS = $(OBJ_PATH:.o=.d)
 INCLUDES = -I./$(INC_DIR)
 
 # Flags
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror -g -Wno-unused
 
 # Compiler
 CC = cc
@@ -37,6 +37,7 @@ all: $(OBJ_DIR) $(NAME)
 
 $(NAME): $(OBJ_PATH) Makefile
 	@$(CC) $(FLAGS) $(OBJ_PATH) -o $(NAME)
+	sudo setcap cap_net_raw=eip ./ft_ping
 	@echo $(YELLOW)$(PROJ) - Creating exec:$(NO_COLOR) $(NAME)
 
 # Compilation
