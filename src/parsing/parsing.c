@@ -65,6 +65,15 @@ int is_decimal(char *str)
 	return 1;
 }
 
+char *check_hexa(char *str)
+{
+	while ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z') || (*str >= 'A' && *str <= 'Z'))
+	{
+		str ++;
+	}
+	return str;
+}
+
 void init(struct s_config *input){
 	struct protoent *protocol;
 
@@ -91,13 +100,13 @@ void get_preload_option(char *arg, struct s_config *input)
 	if (!is_decimal(arg))
 	{
 		fprintf(stderr, "ft_ping: invalid argument: '%s'\n", arg);
-		exit(1);
+		exit(2);
 	}
 	input->preload = atoi(arg);
 	if (strlen(arg) > 5 || input->preload < 1 || input->preload > 65536)
 	{
 		fprintf(stderr, "ft_ping: invalid argument: '%s': out of range: 1 <= value <= 65536\n", arg);
-		exit(1);
+		exit(2);
 	}	
 }
 
@@ -115,8 +124,16 @@ void get_timeout_option(char *arg, struct s_config *input)
 
 void get_pattern_option(char *arg, struct s_config *input)
 {
-	input->flags.pattern = 1;
+	char *hex;
 
+	input->flags.pattern = 1;
+	hex = check_hexa(arg);
+	if (hex)
+	{
+		fprintf(stderr, "ft_ping: patterns must be specified as hex digits: %s\n", hex);
+		exit(2);
+	}
+	input->pattern = arg;
 }
 
 void get_packetsize_option(char *arg, struct s_config *input)
@@ -127,13 +144,13 @@ void get_packetsize_option(char *arg, struct s_config *input)
 	if (!is_decimal(arg))
 	{
 		fprintf(stderr, "ft_ping: invalid argument: '%s'\n", arg);
-		exit(1);
+		exit(2);
 	}
 	size = atoi(arg);
 	if (strlen(arg) > 10 || size < 0 || size > 2147483647)
 	{
 		fprintf(stderr, "ft_ping: invalid argument: '%s': out of range: 0 <= value <= 2147483647\n", arg);
-		exit(1);
+		exit(2);
 	}
 	input->size = (int) size;
 }
@@ -150,13 +167,13 @@ void get_ttl_option(char *arg, struct s_config *input)
 	if (!is_decimal(arg))
 	{
 		fprintf(stderr, "ft_ping: invalid argument: '%s'\n", arg);
-		exit(1);
+		exit(2);
 	}
 	input->ttl = atoi(arg);
 	if (strlen(arg) > 4 || input->ttl < 0 || input->ttl > 255)
 	{
 		fprintf(stderr, "ft_ping: invalid argument: '%s': out of range: 0 <= value <= 255\n", arg);
-		exit(1);
+		exit(2);
 	}	
 }
 
