@@ -147,7 +147,17 @@ void get_timestamp_option(char *arg, struct s_config *input)
 void get_ttl_option(char *arg, struct s_config *input)
 {
 	input->flags.ttl = 1;
-
+	if (!is_decimal(arg))
+	{
+		fprintf(stderr, "ft_ping: invalid argument: '%s'\n", arg);
+		exit(1);
+	}
+	input->ttl = atoi(arg);
+	if (strlen(arg) > 4 || input->ttl < 0 || input->ttl > 255)
+	{
+		fprintf(stderr, "ft_ping: invalid argument: '%s': out of range: 0 <= value <= 255\n", arg);
+		exit(1);
+	}	
 }
 
 
