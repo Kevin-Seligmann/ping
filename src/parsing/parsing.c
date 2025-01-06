@@ -121,9 +121,21 @@ void get_pattern_option(char *arg, struct s_config *input)
 
 void get_packetsize_option(char *arg, struct s_config *input)
 {
-	input->flags.packetsize = 1;
-	// Error
+	ssize_t size;
 
+	input->flags.packetsize = 1;
+	if (!is_decimal(arg))
+	{
+		fprintf(stderr, "ft_ping: invalid argument: '%s'\n", arg);
+		exit(1);
+	}
+	size = atoi(arg);
+	if (strlen(arg) > 10 || size < 0 || size > 2147483647)
+	{
+		fprintf(stderr, "ft_ping: invalid argument: '%s': out of range: 0 <= value <= 2147483647\n", arg);
+		exit(1);
+	}
+	input->size = (int) size;
 }
 
 void get_timestamp_option(char *arg, struct s_config *input)
