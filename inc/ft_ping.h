@@ -14,19 +14,19 @@
 # include <unistd.h>
 
 	struct s_flags {
-		int verbose; // -v (done)
-		int help; // -? or --help or -h (done)
-		int floodping; // -f
-		int preload; // -l (done)
-		int numericOutput; // -n (done) 
-		int deadline; // -w 
-		int timeout; // -W 
-		int pattern; // -p (done)
-		int bypassNormalRoutingTables; // -r 
-		int packetsize; // -s (done)
-		int timestamp; // -T 
-		int ttl; // --ttl or -t (done)
-		// --ip-timestamp
+		int verbose; // -v --verbose 
+		int help; // -? --help
+		int floodping; // -f --flood
+		int preload; // -l --preload=NUMBER 
+		int numericOutput; // -n --numeric
+		int timeout; // -w --timenout=N
+		int linger; // -W --linger=N
+		int pattern; // -p --pattern=PATTERN
+		int bypassNormalRoutingTables; // -r --ignore-routing
+		int packetsize; // -s --size=NUMBER
+		int tos; // -T --tos=NUM 
+		int ttl; // --ttl=N
+		int iptimestamp; // --ip-timestamp=FLAG
 	};
 
 
@@ -65,10 +65,11 @@
 		int size;
 		int interval;
 		int ttl;
+		int tos;
 		int sequence;
 		int socketfd;
+		int address_count;
 		char *pattern;
-		char *destination;
 		struct addrinfo hints;
 		struct addrinfo *addr;
 	};
@@ -86,5 +87,7 @@
 	void print_icmp_header(struct s_icmp_header *icmp_hdr, int size);
 
 	void print_packet(struct s_packet *pkt);
+
+	void usage(int exit_code);
 
 #endif
