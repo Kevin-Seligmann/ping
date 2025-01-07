@@ -9,6 +9,6 @@ void configurate_socket(struct s_config *config);
 void allocate_packet_buffers(struct s_config *config);
 void fill_received_packet_buffer(struct s_config *config);
 void parse(int argc, char **argv, struct s_config *input);
-void ping(struct s_config *config);
+int	ping(struct s_config *config);
 
 #endif

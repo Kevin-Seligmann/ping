@@ -14,9 +14,16 @@
 # include <sys/time.h>
 # include <limits.h>
 # include <unistd.h>
+# include <signal.h>
+# include <sys/select.h>
+
 
 # define TSONLY_TS 0
 # define TSADDR_TS 1
+
+# define END_CURR_PINGING 1
+# define END_ALL_PINGING 2
+# define PINGING 0
 	
 struct s_flags {
 	int verbose; // -v --verbose 
@@ -72,6 +79,7 @@ struct s_config {
 	void *received_packet_buffer;
 	char *address;
 	char *pattern;
+	struct timeval starting_time;
 	struct addrinfo hints;
 	struct addrinfo *addr;
 };

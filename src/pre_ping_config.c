@@ -7,6 +7,7 @@ void set_defaults(struct s_config *input)
 	input->interval = 1;
 	input->size = 56;
 	input->sequence = 1;
+	input->interval = 1000;
 	// input->linger??
 
 	protocol = getprotobyname("icmp");
@@ -48,7 +49,7 @@ void configurate_socket(struct s_config *config)
 		fprintf (stderr, "ft_ping: Lacking privilege for icmp socket.\n");
 		exit(1);
 	}
-	else
+	else if (config->socketfd < 0)
 	{
 		fprintf (stderr, "ft_ping: %s\n", strerror (errno));
 		exit(1);
