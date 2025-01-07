@@ -1,20 +1,4 @@
-#include "parsing.h"
-
-	// struct s_flags {
-	// 	int verbose; // -v --verbose 
-	// 	int help; // -? --help
-	// 	int floodping; // -f --flood
-	// 	int preload; // -l --preload=NUMBER 
-	// 	int numericOutput; // -n --numeric
-	// 	int deadline; // -w --timenout=N
-	// 	int timeout; // -W --linger=N
-	// 	int pattern; // -p --pattern=PATTERN
-	// 	int bypassNormalRoutingTables; // -r --ignore-routing
-	// 	int packetsize; // -s --size=NUMBER
-	// 	int timestamp; // -T --tos=NUM 
-	// 	int ttl; // --ttl=N
-	// 	int timestamp; // --ip-timestamp=FLAG
-	// };
+#include "ft_ping_parse.h"
 
 void exit_w_help(int exit_code)
 {
@@ -60,15 +44,15 @@ void parse_option(char **argv, int *i, struct s_config *input)
 		else if (*option ==  'l')
 			return get_preload_option(get_argument(argv, i, &option), input);
 		else if (*option == 'w')
-			return get_deadline_option(get_argument(argv, i, &option), input);
+			return get_linger_option(get_argument(argv, i, &option), input);
 		else if (*option == 'W')
 			return get_timeout_option(get_argument(argv, i, &option), input);
 		else if (*option == 'p')
 			return get_pattern_option(get_argument(argv, i, &option), input);
 		else if (*option ==  's')
-			return get_packetsize_option(get_argument(argv, i, &option), input);
+			return get_size_option(get_argument(argv, i, &option), input);
 		else if (*option ==  'T')
-			return get_timestamp_option(get_argument(argv, i, &option), input);
+			return get_iptimestamp_option(get_argument(argv, i, &option), input);
 		else if (*option ==  't')
 			return get_ttl_option(get_argument(argv, i, &option), input);
 		else
@@ -107,12 +91,12 @@ char *get_full_argument(char **argv, int *i, char *option)
 	char *arg;
 
 	arg = argv[*i] + strlen(option);
-	if (arg == '=')
+	if (*arg == '=')
 		return (arg + 1);
 	(*i) ++;
 	if (argv[*i])
 		return argv[*i];
-	fprintf(stderr, "ft_ping: option requires an argument -- '%c'\n", option);
+	fprintf(stderr, "ft_ping: option requires an argument -- '%s'\n", option);
 	exit_w_help(64);
 	return NULL;
 }

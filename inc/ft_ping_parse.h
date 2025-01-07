@@ -1,9 +1,8 @@
-#ifndef PARSING_H
+#ifndef FT_PING_PARSE
 
-#define PARSING_H
+#define FT_PING_PARSE
 
 # include "ft_ping.h"
-# include <limits.h>
 
 # define TIMEOUT_MAX INT_MAX
 # define TIMEOUT_MIN 0
@@ -11,8 +10,8 @@
 # define LINGER_MAX INT_MAX
 # define LINGER_MIN 0
 
-# define SIZE_MAX 60000
-# define SIZE_MIN 0
+# define PACKET_SIZE_MAX 60000
+# define PACKET_SIZE_MIN 0
 
 # define TTL_MAX 255
 # define TTL_MIN 0
@@ -34,5 +33,6 @@ void	get_size_option(char *arg, struct s_config *config);
 void	get_tos_option(char *arg, struct s_config *config);
 void	get_ttl_option(char *arg, struct s_config *config);
 void	get_iptimestamp_option(char *arg, struct s_config *config);
+void	usage(int exit_code);
 
 #endif

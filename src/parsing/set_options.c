@@ -1,4 +1,4 @@
-#include "parsing.h"
+#include "ft_ping_parse.h"
 
 void	get_preload_option(char *arg, struct s_config *config)
 {
@@ -52,12 +52,12 @@ void	get_size_option(char *arg, struct s_config *config)
 {
 	config->flags.packetsize = 1;
 	config->size = get_numeric(arg);
-	if (config->size > SIZE_MAX)
+	if (config->size > PACKET_SIZE_MAX)
 	{
 		fprintf(stderr, "option value too big: %s", arg);
 		exit(1);
 	}
-	if (config->size < SIZE_MIN)
+	if (config->size < PACKET_SIZE_MIN)
 	{
 		fprintf(stderr, "option value too small: %s", arg);
 		exit(1);

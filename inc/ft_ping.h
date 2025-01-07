@@ -2,15 +2,17 @@
 
 # define FT_PING_H
 
-# include <stdio.h>
+# include <stdint.h>
 # include <netdb.h>
 # include <string.h>
 # include <errno.h>
-# include <sys/socket.h>
+# include <stdio.h>
+# include <stdlib.h>
 # include <netdb.h>
+# include <sys/socket.h>
 # include <arpa/inet.h>
 # include <sys/time.h>
-# include <stdlib.h>
+# include <limits.h>
 # include <unistd.h>
 
 # define TSONLY_TS 0
@@ -73,23 +75,5 @@ struct s_config {
 	struct addrinfo hints;
 	struct addrinfo *addr;
 };
-
-void exit_w_help(int exit_code);
-
-void parse(int argc, char **argv, struct s_config *input);
-
-void ping(struct s_config *config);
-
-void print_reply(struct s_config *config, struct s_packet *packet);
-
-void print_meta(struct s_config *config);
-
-void print_result(struct s_config *config);
-
-void print_icmp_header(struct s_icmp_header *icmp_hdr, int size);
-
-void print_packet(struct s_packet *pkt);
-
-void usage(int exit_code);
 
 #endif
