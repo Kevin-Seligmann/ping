@@ -113,6 +113,21 @@ void run_pings(char **args, struct s_config *config)
 	}
 }
 
+void allocate_packet_buffers(struct s_config *config)
+{
+	config->received_packet_buffer = malloc(config->size + 8 + 40); //Size + icmp header + max ip header size
+	if (config->received_packet_buffer)
+		config->sent_packet_buffer = malloc(config->size + 8); // Without ip header
+	if (!config->received_packet_buffer || !config->sent_packet_buffer)
+	{
+		free(config->received_packet_buffer);
+		free(config->sent_packet_buffer);
+		close(config->socketfd);
+		fprintf(stderr, "ft_ping %s: malloc\n", strerror(errno));
+		exit(1);
+	}
+}
+
 int main(int argc, char **argv)
 {
 	static struct s_config config;
@@ -120,6 +135,7 @@ int main(int argc, char **argv)
 	set_defaults(&config);
 	parse(argc, argv, &config);
 	configurate_socket(&config);
+	allocate_packet_buffers(&config);
 	run_pings(argv + 1, &config);
 
 	return 0;

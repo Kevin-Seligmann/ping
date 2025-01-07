@@ -66,6 +66,8 @@ struct s_config {
 	int socketfd;
 	int address_count;
 	int iptimestamp;
+	void *sent_packet_buffer;
+	void *received_packet_buffer;
 	char *address;
 	char *pattern;
 	struct addrinfo hints;
