@@ -160,7 +160,6 @@ void parse(int argc, char **argv, struct s_config *input)
 {
 	int i;
 
-	set_defaults(input);
 	i = 1;
 	while (i < argc)
 	{
@@ -177,5 +176,10 @@ void parse(int argc, char **argv, struct s_config *input)
 			input->address_count ++;
 		}
 		i ++;
+	}
+	if (input->address_count == 0)
+	{
+		fprintf(stderr, "ft_ping: missing host operand\n");
+		exit_w_help(64);
 	}
 }

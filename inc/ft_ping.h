@@ -13,8 +13,8 @@
 # include <stdlib.h>
 # include <unistd.h>
 
-# define TSONLY_TS 1
-# define TSADDR_TS 2
+# define TSONLY_TS 0
+# define TSADDR_TS 1
 	
 struct s_flags {
 	int verbose; // -v --verbose 
@@ -32,7 +32,6 @@ struct s_flags {
 	int iptimestamp; // --ip-timestamp=FLAG
 };
 
-
 struct s_ip_header {
 	uint8_t version_and_ihl;
 	uint8_t tos;
@@ -44,7 +43,7 @@ struct s_ip_header {
 	uint16_t checksum;
 	uint32_t source;
 	uint32_t destination;
-}; 
+};
 
 struct s_icmp_header {
 	uint8_t type;
@@ -52,12 +51,6 @@ struct s_icmp_header {
 	uint16_t checksum;
 	uint16_t identifier;
 	uint16_t sequence;
-};
-
-struct s_packet {
-	struct s_ip_header ip_header;
-	struct s_icmp_header icmp_header;
-	uint8_t data[];
 };
 
 struct s_config {
@@ -73,10 +66,13 @@ struct s_config {
 	int socketfd;
 	int address_count;
 	int iptimestamp;
+	char *address;
 	char *pattern;
 	struct addrinfo hints;
 	struct addrinfo *addr;
 };
+
+void exit_w_help(int exit_code);
 
 void parse(int argc, char **argv, struct s_config *input);
 

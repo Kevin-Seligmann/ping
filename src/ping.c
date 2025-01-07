@@ -139,11 +139,10 @@ void send_preload(struct s_config *config)
 
 void ping(struct s_config *config)
 {
-	config->socketfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (config->ttl)
 		set_ttl(config);
 
-	getaddrinfo(config->destination, 0, &(config->hints), &(config->addr));
+	getaddrinfo(config->address, 0, &(config->hints), &(config->addr));
 	print_meta(config);
 	if (config->flags.preload)
 		send_preload(config);
@@ -154,5 +153,6 @@ void ping(struct s_config *config)
 
 		sleep(1);
 	}
+	
 //	print_result(config);
 }

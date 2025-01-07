@@ -1,28 +1,5 @@
 #include "parsing.h"
 
-void set_defaults(struct s_config *input)
-{
-	struct protoent *protocol;
-
-	input->interval = 1;
-	input->size = 56;
-	input->ttl = 64;
-	input->sequence = 1;
-
-	protocol = getprotobyname("icmp");
-	if (!protocol)
-	{
-    	fprintf(stderr, "ft_ping: Unable to find protocol 'icmp'\n");
-   		exit(1);
-	}
-    input->hints.ai_flags = AI_CANONNAME;
-
-    input->hints.ai_family = AF_INET;
-    input->hints.ai_socktype = SOCK_RAW;
-    input->hints.ai_protocol = protocol->p_proto;
-}
-
-
 void	get_preload_option(char *arg, struct s_config *config)
 {
 	char *ptr;
