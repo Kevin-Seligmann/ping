@@ -50,7 +50,7 @@ struct s_ip_header {
 	uint8_t ttl;
 	uint8_t protocol;
 	uint16_t checksum;
-	uint32_t source;
+	struct in_addr source;
 	uint32_t destination;
 };
 
@@ -75,6 +75,7 @@ struct s_config {
 	int socketfd;
 	int address_count;
 	int iptimestamp;
+	int answers;
 	void *sent_packet_buffer;
 	void *received_packet_buffer;
 	char *address;
@@ -83,5 +84,9 @@ struct s_config {
 	struct addrinfo hints;
 	struct addrinfo *addr;
 };
+
+void print_meta(struct s_config *config);
+void print_reply(struct s_config *config);
+
 
 #endif

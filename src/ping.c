@@ -57,13 +57,16 @@ int send_echo_request(struct s_config *config)
 
 
 void listen_echo_reply(struct s_config *config){
-	struct s_packet *packet;
-	ssize_t received;
+	ssize_t received_bytes;
 
-	packet = calloc(config->size + 28, 1);
-	while (1)
+	received_bytes = recvfrom(config->socketfd, config->received_packet_buffer, config->size + 8 + 40, 0, config->addr->ai_addr, &config->addr->ai_addrlen);
+	if (received_bytes >= 0)
 	{
-		received = recvfrom(config->socketfd, packet, config->size + 28 + 8, 0, config->addr->ai_addr, &config->addr->ai_addrlen);
+		config->answers ++;
+		// "packet too short (%d bytes) from %s\n"
+		// "invalid checksum"
+		// Identity check
+		print_reply(config);
 	}
 }
 
@@ -129,8 +132,8 @@ int ping(struct s_config *config)
 		return exit_pinging(config, END_ALL_PINGING);
 	while (status == PINGING)
 	{
-		if (check_timeout(config))
-			return exit_pinging(config, 0);
+		// if (check_timeout(config))
+		//	return exit_pinging(config, 0);
 		select_reply = do_select(config);
 		if (select_reply > 0)
 			listen_echo_reply(config);
@@ -143,7 +146,8 @@ int ping(struct s_config *config)
 		{
 			if (send_echo_request(config) == END_ALL_PINGING)
 				return exit_pinging(config, END_ALL_PINGING);
-			usleep(config->interval);
+			// usleep(config->interval);
+			sleep(1);
 		}
 	}
 //	print_result(config);

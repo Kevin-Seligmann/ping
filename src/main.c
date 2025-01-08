@@ -21,14 +21,14 @@ static int run_pings(char **args, struct s_config *config)
 	int rta;
 
 	gettimeofday(&(config->starting_time), 0);
-	args ++;
-	while (*args)
+	while (config->address_count > 0)
 	{
 		if (is_address(*args))
 		{
 			config->address = *args;
 			(ping(config) == END_ALL_PINGING);
 				return EXIT_FAILURE;
+			config->address_count --;
 		}
 		args ++;
 	}

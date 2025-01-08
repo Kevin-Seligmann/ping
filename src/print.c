@@ -30,38 +30,27 @@ School project made by Kevin Seligmann for 42. Based on ineutils-2.0's ping.\n\
 	exit(exit_code);
 }
 
-// void print_reply(struct s_config *config, struct s_packet *packet){
-// 	char address[INET_ADDRSTRLEN];
-// 	char hostname[NI_MAXHOST];
-// 	struct timeval received_timestamp;
-// 	struct sockaddr_in source_address;
-// 	size_t received_us;
-// 	size_t sent_us;
+void print_reply(struct s_config *config)
+{
+	void *options;
+	struct s_ip_header *ipheader = (struct s_ip_header *) config->received_packet_buffer;
+	if ((ipheader->version_and_ihl & 0xF) > 5)
+		options =  (char *) config->received_packet_buffer + 5 * 4;
+	else
+		options = NULL;
+	struct s_icmp_header *icmpheader = (struct s_icmp_header *) ((char *) config->received_packet_buffer + (ipheader->version_and_ihl & 0xF) * 4);
 
-// 	gettimeofday(&received_timestamp, 0);
-// 	source_address.sin_family = AF_INET;
-// 	source_address.sin_port = 0;
-// 	source_address.sin_addr.s_addr = packet->ip_header.source;
-// 	inet_ntop(AF_INET, (void *) &(packet->ip_header.source), address, INET_ADDRSTRLEN);
-//     getnameinfo((struct sockaddr *)&source_address, sizeof(source_address), hostname, NI_MAXHOST, 0, 0, 0);
-
-// 	printf("%u bytes from ", ntohs(packet->ip_header.length) - 20);
-// 	if (config->flags.numericOutput)
-// 		printf("%s: icmp_seq=%u ", address, packet->icmp_header.sequence);
-// 	else
-// 		printf("%s (%s): icmp_seq=%u ", hostname, address, packet->icmp_header.sequence);
-// 	if (config->flags.verbose)
-// 		printf("ident=%u ", packet->icmp_header.identifier);
-// 	if (config->size >= (int) sizeof(struct timeval))
-// 	{
-// 		sent_us = ((struct timeval *) packet->data)->tv_sec * 1000000 + ((struct timeval *) packet->data)->tv_usec;
-// 		received_us = received_timestamp.tv_sec * 1000000 + received_timestamp.tv_usec;
-// 		printf("ttl=%u time=%g ms\n", packet->ip_header.ttl, (received_us - sent_us) / 1000.);
-// 	} else
-// 	{
-// 		printf("ttl=%u\n", packet->ip_header.ttl);
-// 	}
-// }
+	printf ("%d bytes from %s: icmp_seq=%u ttl=%d",
+	config->size + 8, // Wrong, should use actual size
+	inet_ntoa(ipheader->source),
+	icmpheader->sequence,
+	ipheader->ttl);
+	if ((long unsigned) config->size >= sizeof(struct timeval))
+	{
+		printf (" time= ms"); // =%.3f ms
+	}
+	printf ("\n");
+}
 
 // char *get_ai_family(int family)
 // {
@@ -74,32 +63,19 @@ School project made by Kevin Seligmann for 42. Based on ineutils-2.0's ping.\n\
 // 	}
 // }
 
-void print_verbose_meta(struct s_config *config){
-	struct addrinfo *addresses;
-
-	printf("ping: sock4.fd: %d (socktype: SOCK_RAW), sock6.fd: -1 (socktype: 0), hints.ai_family: %s\n\n", config->socketfd, get_ai_family(config->hints.ai_family));
-	addresses = config->addr;
-
-	while (addresses)
-	{
-		if (addresses->ai_canonname)
-			printf("ai->ai_family: %s, ai->ai_canonname: '%s'\n", get_ai_family(addresses->ai_family), addresses->ai_canonname);
-		else 
-			printf("ai->ai_family: %s, ai->ai_canonname: ''\n", get_ai_family(addresses->ai_family));
-		addresses = addresses->ai_next;
-	}
-}
-
 void print_meta(struct s_config *config)
 {
+	struct s_icmp_header *header;
 	char address[INET_ADDRSTRLEN];
 	struct sockaddr_in *socket_address;
-	
+
+	header = (struct s_icmp_header *) config->sent_packet_buffer;
 	socket_address = (struct sockaddr_in *)config->addr->ai_addr;
 	inet_ntop(AF_INET, &(socket_address->sin_addr), address, INET_ADDRSTRLEN);
+	printf ("PING %s (%s): %u data bytes", config->address, address, config->size);
 	if (config->flags.verbose)
-		print_verbose_meta(config);
-	printf("PING %s (%s) %u(%u) bytes of data.\n", config->address, address, config->size, config->size + 8 + 20);
+		printf (", id 0x%04x = %u", header->identifier, header->identifier);
+	printf ("\n");
 }
 
 // void print_result(struct s_config *config)
