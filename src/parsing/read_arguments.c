@@ -1,11 +1,5 @@
 #include "ft_ping_parse.h"
 
-void exit_w_help(int exit_code)
-{
-	fprintf(stderr, "Try 'ft_ping --help' for more information.\n");
-	exit (exit_code);
-}
-
 char *get_argument(char **argv, int *i, char** option)
 {
 	(*option) ++;
@@ -19,8 +13,7 @@ char *get_argument(char **argv, int *i, char** option)
 		return argv[*i];
 	}
 	(*option) --;
-	fprintf(stderr, "ft_ping: option requires an argument -- '%c'\n", **option);
-	exit_w_help(64);
+	exit_with_help(USAGE_FAILURE, "option requires an argument -- '%c'", **option);
 	return NULL;
 }
 
@@ -56,10 +49,7 @@ void parse_option(char **argv, int *i, struct s_config *input)
 		else if (*option ==  't')
 			return get_ttl_option(get_argument(argv, i, &option), input);
 		else
-		{
-			fprintf(stderr, "ft_ping: invalid option -- '%c'\n", *option);
-			exit_w_help(64);
-		}
+			exit_with_help(USAGE_FAILURE, "invalid option -- '%c'", *option);
 		option ++;
 	}
 }
@@ -76,10 +66,7 @@ int matches_full_option(char *arg, char *option, int needs_argument)
 	if (!option[ind])
 		return 1;
 	if (!needs_argument && option[ind] == '=')
-	{
-		fprintf(stderr, "ft_ping: option '--%s' doesn't allow an argument\n", option);
-		exit_w_help(64);
-	}
+		exit_with_help(USAGE_FAILURE, "option '--%s' doesn't allow an argument", option);
 	if (needs_argument && option[ind] == '=')
 		return 1;
 	return 0;
@@ -96,8 +83,7 @@ char *get_full_argument(char **argv, int *i, char *option)
 	(*i) ++;
 	if (argv[*i])
 		return argv[*i];
-	fprintf(stderr, "ft_ping: option requires an argument -- '%s'\n", option);
-	exit_w_help(64);
+	exit_with_help(USAGE_FAILURE, "option requires an argument -- '%s'", option);
 	return NULL;
 }
 
@@ -134,10 +120,7 @@ void parse_full_option(char **argv, int *i, struct s_config *input)
 	else if (matches_full_option(arg, "ip-timestamp", 1))
 		get_iptimestamp_option(get_full_argument(argv, i, "ip-timestamp"), input);
 	else
-	{
-		fprintf(stderr, "ft_ping: unrecognized option '--%s'\n", arg);
-		exit_w_help(64);
-	}
+		exit_with_help(USAGE_FAILURE, "unrecognized option '--%s'", arg);
 }
 
 void parse(int argc, char **argv, struct s_config *input)
@@ -163,7 +146,6 @@ void parse(int argc, char **argv, struct s_config *input)
 	}
 	if (input->address_count == 0)
 	{
-		fprintf(stderr, "ft_ping: missing host operand\n");
-		exit_w_help(64);
+		exit_with_help(USAGE_FAILURE, "missing host operand");
 	}
 }

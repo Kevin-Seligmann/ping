@@ -21,6 +21,7 @@
 
 # define PRELOAD_MAX INT_MAX
 
+# define USAGE_FAILURE 64
 
 unsigned long get_numeric(char *arg);
 

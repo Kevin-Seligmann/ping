@@ -51,8 +51,7 @@ void set_signal()
     sa.sa_flags = 0;
     if (sigaction(SIGINT, &sa, NULL) == -1)
     {
-        fprintf(stderr, "ft_ping: %s: signal\n", strerror(errno));
-        exit(EXIT_FAILURE);
+		exit_with_message(EXIT_FAILURE, "%s: signal", strerror(errno));
     }
 }
 

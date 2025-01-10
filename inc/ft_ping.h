@@ -17,7 +17,7 @@
 # include <signal.h>
 # include <sys/select.h>
 
-
+# define PROGRAM_NAME "ft_ping"
 # define TSONLY_TS 0
 # define TSADDR_TS 1
 
@@ -87,6 +87,7 @@ struct s_config {
 
 void print_meta(struct s_config *config);
 void print_reply(struct s_config *config);
-
+void exit_with_message(int exit_code, char *exit_msg, ...);
+void exit_with_help(int exit_code, const char *exit_msg, ...);
 
 #endif

@@ -30,6 +30,34 @@ School project made by Kevin Seligmann for 42. Based on ineutils-2.0's ping.\n\
 	exit(exit_code);
 }
 
+static void print_exit_message(const char *exit_msg, va_list args)
+{
+	fprintf(stderr, "%s: ", PROGRAM_NAME);
+	vfprintf(stderr, exit_msg, args);
+}
+
+void exit_with_help(int exit_code, const char *exit_msg, ...)
+{
+	va_list args;
+
+	va_start(args, exit_msg);
+	print_exit_message(exit_msg, args);
+	va_end(args);
+	fprintf(stderr, "\nTry 'ft_ping --help' for more information.\n");
+	exit (exit_code);
+}
+
+void exit_with_message(int exit_code, const char *exit_msg, ...)
+{
+    va_list args;
+
+	va_start(args, exit_msg);
+	print_exit_message(exit_msg, args);
+    va_end(args);
+    fprintf(stderr, "\n");
+    exit(exit_code);
+}
+
 void print_reply(struct s_config *config)
 {
 	void *options;
