@@ -1,26 +1,26 @@
 #include "ft_ping.h"
 
-void print_reply(struct s_config *config)
-{
-	void *options;
-	struct s_ip_header *ipheader = (struct s_ip_header *) config->received_packet_buffer;
-	if ((ipheader->version_and_ihl & 0xF) > 5)
-		options =  (char *) config->received_packet_buffer + 5 * 4;
-	else
-		options = NULL;
-	struct s_icmp_header *icmpheader = (struct s_icmp_header *) ((char *) config->received_packet_buffer + (ipheader->version_and_ihl & 0xF) * 4);
+// void print_reply(struct s_config *config)
+// {
+// 	void *options;
+// 	struct s_ip_header *ipheader = (struct s_ip_header *) config->received_packet_buffer;
+// 	if ((ipheader->version_and_ihl & 0xF) > 5)
+// 		options =  (char *) config->received_packet_buffer + 5 * 4;
+// 	else
+// 		options = NULL;
+// 	struct s_icmp_header *icmpheader = (struct s_icmp_header *) ((char *) config->received_packet_buffer + (ipheader->version_and_ihl & 0xF) * 4);
 
-	printf ("%d bytes from %s: icmp_seq=%u ttl=%d",
-	config->size + 8, // Wrong, should use actual size
-	inet_ntoa(ipheader->source),
-	icmpheader->sequence,
-	ipheader->ttl);
-	if ((long unsigned) config->size >= sizeof(struct timeval))
-	{
-		printf (" time= ms"); // =%.3f ms
-	}
-	printf ("\n");
-}
+// 	printf ("%d bytes from %s: icmp_seq=%u ttl=%d",
+// 	config->size + 8, // Wrong, should use actual size
+// 	inet_ntoa(ipheader->source),
+// 	icmpheader->sequence,
+// 	ipheader->ttl);
+// 	if ((long unsigned) config->size >= sizeof(struct timeval))
+// 	{
+// 		printf (" time= ms"); // =%.3f ms
+// 	}
+// 	printf ("\n");
+// }
 
 // char *get_ai_family(int family)
 // {
@@ -33,20 +33,20 @@ void print_reply(struct s_config *config)
 // 	}
 // }
 
-void print_meta(struct s_config *config)
-{
-	struct s_icmp_header *header;
-	char address[INET_ADDRSTRLEN];
-	struct sockaddr_in *socket_address;
+// void print_meta(struct s_config *config)
+// {
+// 	struct s_icmp_header *header;
+// 	char address[INET_ADDRSTRLEN];
+// 	struct sockaddr_in *socket_address;
 
-	header = (struct s_icmp_header *) config->sent_packet_buffer;
-	socket_address = (struct sockaddr_in *)config->addr->ai_addr;
-	inet_ntop(AF_INET, &(socket_address->sin_addr), address, INET_ADDRSTRLEN);
-	printf ("PING %s (%s): %u data bytes", config->address, address, config->size);
-	if (config->flags.verbose)
-		printf (", id 0x%04x = %u", header->identifier, header->identifier);
-	printf ("\n");
-}
+// 	header = (struct s_icmp_header *) config->sent_packet_buffer;
+// 	socket_address = (struct sockaddr_in *)config->addr->ai_addr;
+// 	inet_ntop(AF_INET, &(socket_address->sin_addr), address, INET_ADDRSTRLEN);
+// 	printf ("PING %s (%s): %u data bytes", config->address, address, config->size);
+// 	if (config->flags.verbose)
+// 		printf (", id 0x%04x = %u", header->identifier, header->identifier);
+// 	printf ("\n");
+// }
 
 // void print_result(struct s_config *config)
 // {

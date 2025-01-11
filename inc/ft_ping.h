@@ -18,29 +18,40 @@
 # include <sys/select.h>
 
 # define PROGRAM_NAME "ft_ping"
-# define TSONLY_TS 0
-# define TSADDR_TS 1
 
+// Program flow
 # define END_CURR_PINGING 1
 # define END_ALL_PINGING 2
 # define PINGING 0
-	
-struct s_flags {
-	int verbose; // -v --verbose 
-	int help; // -? --help
-	int floodping; // -f --flood
-	int preload; // -l --preload=NUMBER 
-	int numericOutput; // -n --numeric
-	int timeout; // -w --timenout=N
-	int linger; // -W --linger=N
-	int pattern; // -p --pattern=PATTERN
-	int bypassNormalRoutingTables; // -r --ignore-routing
-	int packetsize; // -s --size=NUMBER
-	int tos; // -T --tos=NUM 
-	int ttl; // --ttl=N
-	int iptimestamp; // --ip-timestamp=FLAG
-};
 
+
+// Options
+										// Help -? --help
+										// Preload -l --preload=NUMBER 
+ 										// Timeout -w --timenout=N
+										// Linger -W --linger=N
+										// Pattern -p --pattern=PATTERN
+										// Packet size  -s --size=NUMBER
+										// -T --tos=N
+										// --ttl=N
+# define FTP_VERBOSE 0x1				// -v --verbose
+# define FTP_FLOOD 0x2					// -f --flood
+# define FTP_NUMERIC 0x4				// -n --numeric 
+# define FTP_BYPASS_ROUTING_TABLE 0x8	// -r --ignore-routing
+# define FTP_IP_TIMESTAMP 0x10			// --ip-timestamp=FLAG
+
+// Ip timestamp options
+# define TSONLY_TS 0
+# define TSADDR_TS 1
+
+# define IPHDR_TSOPT_TYPE_CODE 0x44
+# define IP_TIMESTAMP_OPTION_OFFSET 5
+
+// Header sizes
+# define ICMP_HDR_SIZE 8
+# define IP_HDR_MAX_SIZE 40 // 20 from header, 20 from options.
+
+// Headers
 struct s_ip_header {
 	uint8_t version_and_ihl;
 	uint8_t tos;
@@ -62,27 +73,41 @@ struct s_icmp_header {
 	uint16_t sequence;
 };
 
-struct s_config {
-	struct s_flags flags;
+// Ping timing information
+struct s_timing {
+	struct timeval starting_time;
+};
+
+// Information about a specific ping routine (of each address passed as argument)
+struct s_ping {
+	struct addrinfo *addr;
+	int sequence;
+	int answer_count;
+	void *received_packet_buffer;
+	void *sent_packet_buffer;
+	char *address;
+};
+
+// Information about all ping routines
+struct s_program_param {
+	struct addrinfo hints;
+	unsigned int flags;
+	int linger;
+	int socketfd;
 	int preload;
 	int timeout;
 	int size;
 	int interval;
 	int ttl;
 	int tos;
-	int sequence;
-	int linger;
-	int socketfd;
-	int address_count;
 	int iptimestamp;
-	int answers;
-	void *sent_packet_buffer;
-	void *received_packet_buffer;
-	char *address;
+	int destinations;
 	char *pattern;
-	struct timeval starting_time;
-	struct addrinfo hints;
-	struct addrinfo *addr;
+};
+
+struct s_config {
+	struct s_program_param params;
+	struct s_ping ping;
 };
 
 void print_meta(struct s_config *config);
@@ -90,5 +115,6 @@ void print_reply(struct s_config *config);
 void exit_with_message(int exit_code, const char *exit_msg, ...);
 void exit_with_help(int exit_code, const char *exit_msg, ...);
 int return_with_message(int return_code, const char *exit_msg, ...);
+void free_resources(struct s_config *config);
 
 #endif
