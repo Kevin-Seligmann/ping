@@ -22,7 +22,7 @@ void parse_option(char **argv, int *i, struct s_config *input)
 	char *option;
 
 	option = argv[*i] + 1;
-	while (option)
+	while (*option)
 	{
 		if (*option == '?' || *option == 'h')
 			usage(0);
@@ -45,7 +45,7 @@ void parse_option(char **argv, int *i, struct s_config *input)
 		else if (*option ==  's')
 			return get_size_option(get_argument(argv, i, &option), input);
 		else if (*option ==  'T')
-			return get_iptimestamp_option(get_argument(argv, i, &option), input);
+			return get_tos_option(get_argument(argv, i, &option), input);
 		else if (*option ==  't')
 			return get_ttl_option(get_argument(argv, i, &option), input);
 		else
@@ -59,16 +59,20 @@ int matches_full_option(char *arg, char *option, int needs_argument)
 	int ind;
 
 	ind = 0;
-	while(arg[ind] == option[ind])
+	while (option[ind] && arg[ind] && option[ind] == arg[ind])
 		ind ++;
-	if (arg[ind])
+	if (!option[ind] && !arg[ind])
+		return 1;
+	if (option[ind])
 		return 0;
-	if (!option[ind])
+	if (arg[ind] == '=')
+	{
+		if (!needs_argument)
+		{
+			exit_with_help(USAGE_FAILURE, "option '--%s' doesn't allow an argument", option);
+		}
 		return 1;
-	if (!needs_argument && option[ind] == '=')
-		exit_with_help(USAGE_FAILURE, "option '--%s' doesn't allow an argument", option);
-	if (needs_argument && option[ind] == '=')
-		return 1;
+	}
 	return 0;
 }
 
@@ -77,7 +81,7 @@ char *get_full_argument(char **argv, int *i, char *option)
 {
 	char *arg;
 
-	arg = argv[*i] + strlen(option);
+	arg = argv[*i] + strlen(option) + 2;
 	if (*arg == '=')
 		return (arg + 1);
 	(*i) ++;

@@ -5,16 +5,16 @@
 # include "ft_ping.h"
 
 # define TIMEOUT_MAX INT_MAX
-# define TIMEOUT_MIN 0
+# define TIMEOUT_MIN 1
 
 # define LINGER_MAX INT_MAX
-# define LINGER_MIN 0
+# define LINGER_MIN 1
 
 # define PACKET_SIZE_MAX 60000
 # define PACKET_SIZE_MIN 0
 
 # define TTL_MAX 255
-# define TTL_MIN 0
+# define TTL_MIN 1
 
 # define TOS_MAX 255
 # define TOS_MIN 1

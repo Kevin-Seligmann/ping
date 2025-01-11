@@ -1,4 +1,4 @@
-#include "pre_ping_config.h"
+#include "ft_ping.h"
 
 void set_defaults(struct s_config *input)
 {
@@ -13,8 +13,7 @@ void set_defaults(struct s_config *input)
 	protocol = getprotobyname("icmp");
 	if (!protocol)
 	{
-    	fprintf(stderr, "ft_ping: Unable to find protocol 'icmp'\n");
-   		exit(1);
+		exit_with_message(EXIT_FAILURE, "Unable to find protocol 'icmp'");
 	}
     input->hints.ai_flags = AI_CANONNAME;
 

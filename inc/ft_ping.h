@@ -87,7 +87,8 @@ struct s_config {
 
 void print_meta(struct s_config *config);
 void print_reply(struct s_config *config);
-void exit_with_message(int exit_code, char *exit_msg, ...);
+void exit_with_message(int exit_code, const char *exit_msg, ...);
 void exit_with_help(int exit_code, const char *exit_msg, ...);
+int return_with_message(int return_code, const char *exit_msg, ...);
 
 #endif

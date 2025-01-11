@@ -1,6 +1,6 @@
 #include "ft_ping_parse.h"
 
-static unsigned long bounded_strtoul_wrapper(char *arg, unsigned int min, unsigned int max)
+static unsigned long bounded_strtoul_wrapper(char *arg, unsigned int max, unsigned int min)
 {
 	char *ptr;
 	unsigned long result;
@@ -13,7 +13,7 @@ static unsigned long bounded_strtoul_wrapper(char *arg, unsigned int min, unsign
 	}
 	if (result > max)
 	{
-		exit_with_message(EXIT_FAILURE, "invalid preload value (%s)", arg);
+		exit_with_message(EXIT_FAILURE, "option value too big: %s", arg);
 	}
 	if (result < min)
 	{
@@ -79,7 +79,7 @@ void	get_pattern_option(char *arg, struct s_config *config)
 		}
 		else
 		{
-			exit_with_message( "error in pattern near %s", arg);
+			exit_with_message(EXIT_FAILURE, "error in pattern near %s", arg);
 		}
 	}
 	config->pattern = arg;

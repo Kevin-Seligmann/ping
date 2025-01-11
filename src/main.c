@@ -63,11 +63,11 @@ int main(int argc, char **argv)
 	set_signal();
 	set_defaults(&config);
 	parse(argc, argv, &config);
-	configurate_socket(&config);
-	allocate_packet_buffers(&config);
-	fill_received_packet_buffer(&config);
-	exit_code = run_pings(argv + 1, &config); // Before here is safe to end with exit(), here it gets the exit from the program.
-	free_resources(&config);
+	// configurate_socket(&config);
+	// allocate_packet_buffers(&config);
+	// fill_received_packet_buffer(&config);
+	// exit_code = run_pings(argv + 1, &config); // Before here is safe to end with exit(), here it gets the exit from the program.
+	// free_resources(&config);
 
-	return exit_code;
+	return EXIT_SUCCESS;
 }

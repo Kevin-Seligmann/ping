@@ -1,7 +1,7 @@
 VPATH = src src/parsing
 
 # Files
-OBJ = main.o read_arguments.o set_options.o validation_utils.o pre_ping_config.o ping.o print.o
+OBJ = main.o read_arguments.o set_options.o pre_ping_config.o ping.o ping_printing.o exit_utils.o
 
 # Target
 NAME = ft_ping
