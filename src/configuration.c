@@ -22,13 +22,13 @@ static void allocate_packet_buffers(struct s_config *config)
 	int err;
 
 	config->ping.received_packet_buffer = malloc(config->params.size + ICMP_HDR_SIZE + IP_HDR_MAX_SIZE);
-	if (!config->ping.received_packet_buffer)
+	if (config->ping.received_packet_buffer)
 		config->ping.sent_packet_buffer = malloc(config->params.size + ICMP_HDR_SIZE);
 	if (!config->ping.received_packet_buffer || !config->ping.sent_packet_buffer)
 	{
 		err = errno;
 		free_resources(config);
-		exit_with_message("%s: malloc\n", strerror(err));
+		exit_with_message(EXIT_FAILURE, "%s: malloc\n", strerror(err));
 	}
 }
 
@@ -84,16 +84,16 @@ static void configurate_socket_failure_w_strerror(struct s_program_param *params
 	exit_with_message(EXIT_FAILURE, err_msg, strerror(err));
 }
 
-static void configurate_timestamp_option(struct s_config *config)
+static void configurate_timestamp_option(struct s_program_param *params)
 {
 	uint8_t option[4];
 
 	option[0] = IPHDR_TSOPT_TYPE_CODE; // Type = TS; 0x44
 	option[1] = IP_HDR_MAX_SIZE; // Length (Max- 40 bytes)
 	option[2] = IP_TIMESTAMP_OPTION_OFFSET; // 5
-	option[3] = config->params.iptimestamp; // 0 or 1, meaning TS or TS and ADDR
-    if (setsockopt(config->params.socketfd, IPPROTO_IP, IP_OPTIONS, &option, sizeof(option)) < 0)
-		configurate_socket_failure_w_strerror(config, "%s: setsockopt(TIMESTAMP-OPTIONS)");
+	option[3] = params->iptimestamp; // 0 or 1, meaning TS or TS and ADDR
+    if (setsockopt(params->socketfd, IPPROTO_IP, IP_OPTIONS, &option, sizeof(option)) < 0)
+		configurate_socket_failure_w_strerror(params, "%s: setsockopt(TIMESTAMP-OPTIONS)");
 }
 
 static void configurate_socket(struct s_program_param *params)
@@ -119,10 +119,20 @@ static void configurate_socket(struct s_program_param *params)
 		configurate_timestamp_option(params);
 }
 
+static void set_ping_shared_configuration(struct s_ping *ping)
+{
+	ping->sent_icmp_hdr = (struct s_icmp_header *) ping->sent_packet_buffer;
+	ping->ip_hdr = (struct s_ip_header *) ping->received_packet_buffer;
+	ping->sent_icmp_hdr->type = 8;
+	ping->sent_icmp_hdr->code = 0;
+	ping->sent_icmp_hdr->identifier = getpid();
+}
+
 void prepare_pinging(struct s_config *config)
 {
-	configurate_socket(&config);
-	allocate_packet_buffers(&config);
-	fill_received_packet_buffer(&config);
+	configurate_socket(&config->params);
+	allocate_packet_buffers(config);
+	fill_received_packet_buffer(config);
+	set_ping_shared_configuration(&config->ping);
 }
 

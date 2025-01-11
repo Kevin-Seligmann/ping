@@ -25,50 +25,39 @@ uint16_t checksum(void *header, size_t size){
     return ~sum;
 }
 
-// int send_echo_request(struct s_config *config)
-// {
-// 	struct s_icmp_header *header;
-// 	ssize_t bytes_sent;
+int validate_ping(struct s_ping *ping)
+{
+	if (ping->received_bytes < 0)
+		return 0;
+	ping->ip_hdr = (struct s_ip_header *) ping->received_packet_buffer;
+	ping->recv_icmp_hdr = (struct s_icmp_header *) (ping->received_packet_buffer + (ping->ip_hdr->version_and_ihl & 0xF) * WORD_SIZE_ON_BYTES);
+	if (ping->recv_icmp_hdr->type != 0)
+		return 0;
+	// "packet too short (%d bytes) from %s\n"
+	// "invalid checksum"
+	// Identity check
+	return 1;
+}
 
-// 	header = (struct s_icmp_header *) config->sent_packet_buffer;
-// 	header->type = 8;
-// 	header->code = 0;
-// 	header->checksum = 0;
-// 	header->identifier = getpid();
-// 	header->sequence = config->sequence;
-// 	if (config->size >= (int) sizeof(struct timeval))
-// 	{
-//     	gettimeofday((struct timeval *) (config->sent_packet_buffer + sizeof(*header)), NULL);
-// 	}
-// 	header->checksum = checksum(config->sent_packet_buffer, config->size + sizeof(*header));
-// 	bytes_sent = sendto(config->socketfd, config->sent_packet_buffer, config->size + sizeof(*header), 0, config->addr->ai_addr, config->addr->ai_addrlen);
-// 	if (bytes_sent == -1)
-// 	{
-// 		fprintf(stderr, "ft_ping: %s: sending packet\n", strerror(errno));
-// 		return END_ALL_PINGING;
-// 	}
-// 	config->sequence ++;
-// 	if ((long unsigned) bytes_sent < config->size + sizeof(*header)) // Plus size of ip header?
-// 	{
-// 		printf ("ping: wrote %s %lu chars, ret=%lu\n", config->address, config->size + sizeof(*header), bytes_sent);
-// 	}
-// 	return 0;
-// }
+void listen_echo_reply(struct s_program_param *params, struct s_ping *ping)
+{
+	struct timeval timestamp;
 
-
-// void listen_echo_reply(struct s_config *config){
-// 	ssize_t received_bytes;
-
-// 	received_bytes = recvfrom(config->socketfd, config->received_packet_buffer, config->size + 8 + 40, 0, config->addr->ai_addr, &config->addr->ai_addrlen);
-// 	if (received_bytes >= 0)
-// 	{
-// 		config->answers ++;
-// 		// "packet too short (%d bytes) from %s\n"
-// 		// "invalid checksum"
-// 		// Identity check
-// 		print_reply(config);
-// 	}
-// }
+	ping->received_bytes = recvfrom(
+		params->socketfd, 
+		ping->received_packet_buffer, 
+		params->size + ICMP_HDR_SIZE + IP_HDR_MAX_SIZE, 
+		0, 
+		ping->addr->ai_addr, 
+		&ping->addr->ai_addrlen);
+	gettimeofday(&timestamp, 0);
+	if (!validate_ping(ping))
+		listen_echo_reply(params, ping);
+	ping->answer_count ++;
+	ping->time.received_timestamp = timestamp;
+	print_reply(params, ping);
+	sleep(1);
+}
 
 // int send_preload(struct s_config *config)
 // {
@@ -82,12 +71,6 @@ uint16_t checksum(void *header, size_t size){
 // 		count ++;
 // 	}
 // 	return 0;
-// }
-
-// int exit_pinging(struct s_config *config, int code)
-// {
-// 	freeaddrinfo(config->addr);
-// 	return code;
 // }
 
 // int do_select(struct s_config *config)
@@ -115,41 +98,72 @@ uint16_t checksum(void *header, size_t size){
 // 	return (us_since_start >= config->timeout * 1000000);
 // }
 
-// int ping(struct s_config *config)
-// {
-// 	int select_reply;
+static void configure_ping(struct s_config *config, struct s_program_param *params, struct s_ping *ping)
+{
+	status = PINGING;
+	ping->answer_count = 0;
+	ping->sequence = 0;
+	if (getaddrinfo(ping->destination, 0, &(params->hints), &(ping->addr)))
+		exit_wmsg_and_free(config, EXIT_FAILURE, "unknown host");
+}
 
-// 	status = PINGING;
-// 	if (getaddrinfo(config->address, 0, &(config->hints), &(config->addr)))
-// 	{
-// 		fprintf(stderr, "ft_ping: unknown host\n");
-// 		return (END_ALL_PINGING);
-// 	}
-// 	print_meta(config);
-// 	if (send_preload(config) == END_ALL_PINGING)
-// 		return exit_pinging(config, END_ALL_PINGING);
-// 	if (send_echo_request(config) == END_ALL_PINGING)
-// 		return exit_pinging(config, END_ALL_PINGING);
-// 	while (status == PINGING)
-// 	{
-// 		// if (check_timeout(config))
-// 		//	return exit_pinging(config, 0);
-// 		select_reply = do_select(config);
-// 		if (select_reply > 0)
-// 			listen_echo_reply(config);
-// 		else if (select_reply < 0)
-// 		{
-// 			fprintf(stderr, "ft_ping: select failed\n");
-// 			return exit_pinging(config, END_ALL_PINGING);
-// 		}
-// 		else 
-// 		{
-// 			if (send_echo_request(config) == END_ALL_PINGING)
-// 				return exit_pinging(config, END_ALL_PINGING);
-// 			// usleep(config->interval);
-// 			sleep(1);
-// 		}
-// 	}
-// //	print_result(config);
-// 	return exit_pinging(config, 0);
-// }
+static void build_icmp_header(struct s_program_param *params, struct s_ping *ping)
+{
+	ping->sent_icmp_hdr->checksum = 0;
+	ping->sent_icmp_hdr->sequence = ping->sequence;
+	if (params->size >= (int) sizeof(struct timeval))
+	{
+		memset(ping->sent_packet_buffer + ICMP_HDR_SIZE, 0, sizeof(struct timeval));
+    	gettimeofday((struct timeval *) (ping->sent_packet_buffer + ICMP_HDR_SIZE), NULL);
+	}
+	ping->sent_icmp_hdr->checksum = checksum(ping->sent_packet_buffer, params->size + ICMP_HDR_SIZE);
+}
+
+
+static void send_echo_request(struct s_config *config, struct s_program_param *params, struct s_ping *ping)
+{
+	build_icmp_header(params, ping);
+	ping->sent_bytes = sendto(
+		params->socketfd, 
+		ping->sent_packet_buffer, 
+		params->size + sizeof(*ping->sent_icmp_hdr),
+		0, ping->addr->ai_addr, 
+		ping->addr->ai_addrlen
+	);
+	if (ping->sent_bytes == -1)
+		exit_wmsg_and_free(config, EXIT_FAILURE, "%s: sending packet", strerror(errno));
+	config->ping.sequence ++;
+	if (ping->sent_bytes < params->size + ICMP_HDR_SIZE)
+	{
+ 		printf ("ft_ping: wrote %s %d chars, ret=%lu\n", ping->destination, params->size + ICMP_HDR_SIZE, ping->sent_bytes);
+	}
+}
+
+void do_ping_loop(struct s_config *config)
+{
+	// if (check_timeout(config))
+	// 	return exit_pinging(config, 0);
+	// select_reply = do_select(config);
+	// if (select_reply > 0)
+	listen_echo_reply(&config->params, &config->ping);
+	// else if (select_reply < 0)
+	// {
+	// 	fprintf(stderr, "ft_ping: select failed\n");
+	// 	return exit_pinging(config, END_ALL_PINGING);
+	// }
+	// else 
+	// {
+	send_echo_request(config, &config->params, &config->ping);
+}
+
+void ping(struct s_config *config)
+{
+	configure_ping(config, &config->params, &config->ping);
+	print_meta(&config->params, &config->ping);
+	// send_preload(config);
+	send_echo_request(config, &config->params, &config->ping);
+ 	while (status == PINGING)
+		do_ping_loop(config);
+//	print_result(config);
+	freeaddrinfo(config->ping.addr);
+}

@@ -1,26 +1,32 @@
 #include "ft_ping.h"
 
-// void print_reply(struct s_config *config)
-// {
-// 	void *options;
-// 	struct s_ip_header *ipheader = (struct s_ip_header *) config->received_packet_buffer;
-// 	if ((ipheader->version_and_ihl & 0xF) > 5)
-// 		options =  (char *) config->received_packet_buffer + 5 * 4;
-// 	else
-// 		options = NULL;
-// 	struct s_icmp_header *icmpheader = (struct s_icmp_header *) ((char *) config->received_packet_buffer + (ipheader->version_and_ihl & 0xF) * 4);
+// T2 > T1 (T2 after T1)
+static unsigned long get_time_diff_us(struct timeval t1, struct timeval t2)
+{
+	return (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
+}
 
-// 	printf ("%d bytes from %s: icmp_seq=%u ttl=%d",
-// 	config->size + 8, // Wrong, should use actual size
-// 	inet_ntoa(ipheader->source),
-// 	icmpheader->sequence,
-// 	ipheader->ttl);
-// 	if ((long unsigned) config->size >= sizeof(struct timeval))
-// 	{
-// 		printf (" time= ms"); // =%.3f ms
-// 	}
-// 	printf ("\n");
-// }
+void print_reply(struct s_program_param *params, struct s_ping *ping)
+{
+	unsigned long time;
+
+	// void *options;
+	// if ((ipheader->version_and_ihl & 0xF) > 5)
+	// 	options =  (char *) config->received_packet_buffer + 5 * 4;
+	// else
+	//	options = NULL;
+	printf ("%lu bytes from %s: icmp_seq=%u ttl=%d",
+		ping->received_bytes - (ping->ip_hdr->version_and_ihl & 0xf) * WORD_SIZE_ON_BYTES,
+		inet_ntoa(ping->ip_hdr->source),
+		ping->recv_icmp_hdr->sequence,
+		ping->ip_hdr->ttl);
+	if ((long unsigned) params->size >= sizeof(struct timeval))
+	{
+		time = get_time_diff_us(* ((struct timeval *) ((char *) ping->recv_icmp_hdr + ICMP_HDR_SIZE)), ping->time.received_timestamp);
+		printf (" time=%.3f ms", time / 1000.);
+	}
+	printf ("\n");
+}
 
 // char *get_ai_family(int family)
 // {
@@ -33,20 +39,18 @@
 // 	}
 // }
 
-// void print_meta(struct s_config *config)
-// {
-// 	struct s_icmp_header *header;
-// 	char address[INET_ADDRSTRLEN];
-// 	struct sockaddr_in *socket_address;
+void print_meta(struct s_program_param *params, struct s_ping *ping)
+{
+	char address[INET_ADDRSTRLEN];
+	struct sockaddr_in *socket_address;
 
-// 	header = (struct s_icmp_header *) config->sent_packet_buffer;
-// 	socket_address = (struct sockaddr_in *)config->addr->ai_addr;
-// 	inet_ntop(AF_INET, &(socket_address->sin_addr), address, INET_ADDRSTRLEN);
-// 	printf ("PING %s (%s): %u data bytes", config->address, address, config->size);
-// 	if (config->flags.verbose)
-// 		printf (", id 0x%04x = %u", header->identifier, header->identifier);
-// 	printf ("\n");
-// }
+	socket_address = (struct sockaddr_in *) ping->addr->ai_addr;
+	inet_ntop(AF_INET, &(socket_address->sin_addr), address, INET_ADDRSTRLEN);
+	printf ("PING %s (%s): %u data bytes", ping->destination, address, params->size);
+	if (params->flags & FTP_VERBOSE)
+		printf (", id 0x%04x = %u", ping->sent_icmp_hdr->identifier, ping->sent_icmp_hdr->identifier);
+	printf ("\n");
+}
 
 // void print_result(struct s_config *config)
 // {
@@ -55,14 +59,14 @@
 
 // // Debugging tools
 
-// void print_icmp_header(struct s_icmp_header *icmp_hdr, int size)
+// void print_icmp_header(struct s_icmp_header *sent_icmp_hdr, int size)
 // {
 //     printf("ICMP Header. ");
-//     printf(" Type: %u", icmp_hdr->type);
-//     printf(" Code: %u", icmp_hdr->code);
-//     printf(" Checksum: 0x%04x", icmp_hdr->checksum);
-//     printf(" Identifier: 0x%04x", icmp_hdr->identifier);
-//     printf(" Sequence: 0x%04x\n", icmp_hdr->sequence);
+//     printf(" Type: %u", sent_icmp_hdr->type);
+//     printf(" Code: %u", sent_icmp_hdr->code);
+//     printf(" Checksum: 0x%04x", sent_icmp_hdr->checksum);
+//     printf(" Identifier: 0x%04x", sent_icmp_hdr->identifier);
+//     printf(" Sequence: 0x%04x\n", sent_icmp_hdr->sequence);
 // 	printf("PAYLOAD: ");
 
 // 	char *ptr;

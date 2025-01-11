@@ -24,7 +24,6 @@
 # define END_ALL_PINGING 2
 # define PINGING 0
 
-
 // Options
 										// Help -? --help
 										// Preload -l --preload=NUMBER 
@@ -50,6 +49,7 @@
 // Header sizes
 # define ICMP_HDR_SIZE 8
 # define IP_HDR_MAX_SIZE 40 // 20 from header, 20 from options.
+# define WORD_SIZE_ON_BYTES 4
 
 // Headers
 struct s_ip_header {
@@ -75,17 +75,23 @@ struct s_icmp_header {
 
 // Ping timing information
 struct s_timing {
-	struct timeval starting_time;
+	struct timeval received_timestamp;
 };
 
-// Information about a specific ping routine (of each address passed as argument)
+// Information about a specific ping routine (of each destination passed as argument)
 struct s_ping {
+	struct s_timing time;
 	struct addrinfo *addr;
+	struct s_icmp_header *sent_icmp_hdr;
+	struct s_icmp_header *recv_icmp_hdr;
+	struct s_ip_header *ip_hdr;
 	int sequence;
 	int answer_count;
+	long received_bytes;
+	long sent_bytes;
 	void *received_packet_buffer;
 	void *sent_packet_buffer;
-	char *address;
+	char *destination;
 };
 
 // Information about all ping routines
@@ -110,11 +116,12 @@ struct s_config {
 	struct s_ping ping;
 };
 
-void print_meta(struct s_config *config);
-void print_reply(struct s_config *config);
+void print_meta(struct s_program_param *params, struct s_ping *ping);
+void print_reply(struct s_program_param *params, struct s_ping *ping);
 void exit_with_message(int exit_code, const char *exit_msg, ...);
 void exit_with_help(int exit_code, const char *exit_msg, ...);
 int return_with_message(int return_code, const char *exit_msg, ...);
 void free_resources(struct s_config *config);
+void exit_wmsg_and_free(struct s_config *config, int exit_code, char *exit_msg, ...);
 
 #endif

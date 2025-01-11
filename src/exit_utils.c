@@ -70,3 +70,18 @@ void exit_with_message(int exit_code, const char *exit_msg, ...)
     fprintf(stderr, "\n");
     exit(exit_code);
 }
+
+void exit_wmsg_and_free(struct s_config *config, int exit_code, char *exit_msg, ...)
+{
+    va_list args;
+
+	va_start(args, exit_msg);
+	print_exit_message(exit_msg, args);
+    va_end(args);
+    fprintf(stderr, "\n");
+	freeaddrinfo(config->ping.addr);
+	free(config->ping.received_packet_buffer);
+	free(config->ping.sent_packet_buffer);
+    close(config->params.socketfd);
+    exit(exit_code);
+}

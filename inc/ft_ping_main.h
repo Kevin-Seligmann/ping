@@ -10,5 +10,7 @@ void allocate_packet_buffers(struct s_config *config);
 void fill_received_packet_buffer(struct s_config *config);
 void parse(int argc, char **argv, struct s_program_param *params);
 int	ping(struct s_config *config);
+void prepare_pinging(struct s_config *config);
+void set_signal();
 
 #endif
