@@ -34,6 +34,8 @@ static void parse_option(char **argv, int *i, struct s_program_param *params)
 			params->flags |= FTP_NUMERIC;
 		else if (*option == 'r')
 			params->flags |= FTP_BYPASS_ROUTING_TABLE;
+		else if (*option == 'q')
+			params->flags |= FTP_QUIET;
 		else if (*option ==  'l')
 			return get_preload_option(get_argument(argv, i, &option), params);
 		else if (*option == 'w')
@@ -105,6 +107,8 @@ static void parse_full_option(char **argv, int *i, struct s_program_param *param
 		params->flags |= FTP_NUMERIC;
 	else if (matches_full_option(arg, "ignore-routing", 0))
 		params->flags |= FTP_BYPASS_ROUTING_TABLE;
+	else if (matches_full_option(arg, "quiet", 0))
+		params->flags |= FTP_QUIET;
 	else if (matches_full_option(arg, "preload", 1))
 		get_preload_option(get_full_argument(argv, i, "preload"), params);
 	else if (matches_full_option(arg, "timeout", 1))

@@ -2,36 +2,6 @@
 
 #include <stdarg.h>
 
-void usage(int exit_code){
-printf("\
-Usage: ./ft_ping [OPTION...] HOST ...\n\
-Send ICMP ECHO_REQUEST packets to network hosts.\n\
-\n\
-  -n, --numeric              do not resolve host addresses\n\
-  -r, --ignore-routing       send directly to a host on an attached network\n\
-      --ttl=N                specify N as time-to-live\n\
-  -T, --tos=NUM              set type of service (TOS) to NUM\n\
-  -v, --verbose              verbose output\n\
-  -w, --timeout=N            stop after N seconds\n\
-  -W, --linger=N             number of seconds to wait for response\n\
-  -f, --flood                flood ping (root only)\n\
-      --ip-timestamp=FLAG    IP timestamp of type FLAG, which is one of\n\
-                             \"tsonly\" and \"tsaddr\"\n\
-  -l, --preload=NUMBER       send NUMBER packets as fast as possible before\n\
-                             falling into normal mode of behavior (root only)\n\
-  -p, --pattern=PATTERN      fill ICMP packet with given pattern (hex)\n\
-  -s, --size=NUMBER          send NUMBER data octets\n\
-\n\
-  -?, -h, --help             give this help list\n\
-\n\
-Mandatory or optional arguments to long options are also mandatory or optional\n\
-for any corresponding short options.\n\
-\n\
-School project made by Kevin Seligmann for 42. Based on ineutils-2.0's ping.\n\
-");
-	exit(exit_code);
-}
-
 static void print_exit_message(const char *exit_msg, va_list args)
 {
 	fprintf(stderr, "%s: ", PROGRAM_NAME);

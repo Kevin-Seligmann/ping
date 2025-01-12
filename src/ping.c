@@ -74,7 +74,8 @@ void listen_echo_reply(struct s_program_param *params, struct s_ping *ping)
 	if (!validate_ping(ping))
 		return ;
 	set_successful_ping_data(ping, timestamp);
-	print_reply(params, ping);
+	if (!(params->flags & FTP_QUIET))
+		print_reply(params, ping);
 }
 
 int do_select(struct s_program_param *params, struct s_ping *ping)
@@ -139,7 +140,7 @@ static void send_echo_request(struct s_config *config, struct s_program_param *p
 	{
  		printf ("ft_ping: wrote %s %d chars, ret=%lu\n", ping->destination, params->size + ICMP_HDR_SIZE, ping->sent_bytes);
 	}
-	if (params->flags & FTP_FLOOD)
+	if (params->flags & FTP_FLOOD && !(params->flags & FTP_QUIET))
 		putchar('.');
 }
 
