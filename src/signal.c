@@ -20,4 +20,5 @@ void set_signal()
     {
 		exit_with_message(EXIT_FAILURE, "%s: signal", strerror(errno));
     }
+	status = PINGING;
 }

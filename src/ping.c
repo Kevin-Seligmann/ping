@@ -52,9 +52,20 @@ void listen_echo_reply(struct s_program_param *params, struct s_ping *ping)
 		&ping->addr->ai_addrlen);
 	gettimeofday(&timestamp, 0);
 	if (!validate_ping(ping))
+	{
 		listen_echo_reply(params, ping);
+		return ;
+	}
 	ping->answer_count ++;
 	ping->time.received_timestamp = timestamp;
+	ping->time.asnwer_time = get_time_diff_us(* ((struct timeval *) ((char *) ping->recv_icmp_hdr + ICMP_HDR_SIZE)), ping->time.received_timestamp) / 1000.;
+	ping->time.max = fmax(ping->time.max, ping->time.asnwer_time);
+	if (ping->time.min)
+		ping->time.min = fmin(ping->time.min, ping->time.asnwer_time);
+	else
+		ping->time.min = ping->time.asnwer_time;
+	ping->time.total += ping->time.asnwer_time;
+	ping->time.total_squared += ping->time.asnwer_time * ping->time.asnwer_time;
 	print_reply(params, ping);
 	sleep(1);
 }
@@ -100,9 +111,12 @@ void listen_echo_reply(struct s_program_param *params, struct s_ping *ping)
 
 static void configure_ping(struct s_config *config, struct s_program_param *params, struct s_ping *ping)
 {
-	status = PINGING;
 	ping->answer_count = 0;
 	ping->sequence = 0;
+	ping->time.max = 0;
+	ping->time.min = 0;
+	ping->time.total = 0;
+	ping->time.total_squared = 0;
 	if (getaddrinfo(ping->destination, 0, &(params->hints), &(ping->addr)))
 		exit_wmsg_and_free(config, EXIT_FAILURE, "unknown host");
 }
@@ -153,7 +167,8 @@ void do_ping_loop(struct s_config *config)
 	// }
 	// else 
 	// {
-	send_echo_request(config, &config->params, &config->ping);
+	if (status == PINGING)
+		send_echo_request(config, &config->params, &config->ping);
 }
 
 void ping(struct s_config *config)
@@ -164,6 +179,6 @@ void ping(struct s_config *config)
 	send_echo_request(config, &config->params, &config->ping);
  	while (status == PINGING)
 		do_ping_loop(config);
-//	print_result(config);
+	print_result(&config->params, &config->ping);
 	freeaddrinfo(config->ping.addr);
 }

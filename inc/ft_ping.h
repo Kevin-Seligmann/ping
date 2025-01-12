@@ -16,6 +16,7 @@
 # include <unistd.h>
 # include <signal.h>
 # include <sys/select.h>
+# include <math.h>
 
 # define PROGRAM_NAME "ft_ping"
 
@@ -76,6 +77,11 @@ struct s_icmp_header {
 // Ping timing information
 struct s_timing {
 	struct timeval received_timestamp;
+	double asnwer_time;
+	double min;
+	double max;
+	double total;
+	double total_squared;
 };
 
 // Information about a specific ping routine (of each destination passed as argument)
@@ -116,8 +122,10 @@ struct s_config {
 	struct s_ping ping;
 };
 
+unsigned long get_time_diff_us(struct timeval t1, struct timeval t2);
 void print_meta(struct s_program_param *params, struct s_ping *ping);
 void print_reply(struct s_program_param *params, struct s_ping *ping);
+void print_result(struct s_program_param *params, struct s_ping *ping);
 void exit_with_message(int exit_code, const char *exit_msg, ...);
 void exit_with_help(int exit_code, const char *exit_msg, ...);
 int return_with_message(int return_code, const char *exit_msg, ...);

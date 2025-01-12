@@ -1,7 +1,7 @@
 #include "ft_ping.h"
 
 // T2 > T1 (T2 after T1)
-static unsigned long get_time_diff_us(struct timeval t1, struct timeval t2)
+unsigned long get_time_diff_us(struct timeval t1, struct timeval t2)
 {
 	return (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
 }
@@ -19,11 +19,11 @@ void print_reply(struct s_program_param *params, struct s_ping *ping)
 		ping->received_bytes - (ping->ip_hdr->version_and_ihl & 0xf) * WORD_SIZE_ON_BYTES,
 		inet_ntoa(ping->ip_hdr->source),
 		ping->recv_icmp_hdr->sequence,
-		ping->ip_hdr->ttl);
+		ping->ip_hdr->ttl
+	);
 	if ((long unsigned) params->size >= sizeof(struct timeval))
 	{
-		time = get_time_diff_us(* ((struct timeval *) ((char *) ping->recv_icmp_hdr + ICMP_HDR_SIZE)), ping->time.received_timestamp);
-		printf (" time=%.3f ms", time / 1000.);
+		printf (" time=%.3f ms", ping->time.asnwer_time);
 	}
 	printf ("\n");
 }
@@ -52,10 +52,34 @@ void print_meta(struct s_program_param *params, struct s_ping *ping)
 	printf ("\n");
 }
 
-// void print_result(struct s_config *config)
-// {
-// 	printf("No implementado!\n");
-// }
+void print_result(struct s_program_param *params, struct s_ping *ping)
+{
+	double average;
+	double stddev;
+
+	printf("--- %s ping statistics ---\n", ping->destination);
+	printf("%u packets transmitted, ", ping->sequence);
+	printf("%u packets received, ", ping->answer_count);
+	if (ping->answer_count)
+	{
+		if (ping->answer_count > ping->sequence)
+			printf ("-- somebody is printing forged packets!");
+		else
+			printf ("%d%% packet loss", (((ping->sequence - ping->answer_count) * 100) / ping->sequence));
+	}
+	printf ("\n");
+	if (ping->answer_count &&params->size >=  (int) sizeof(struct timeval)) // TODO: Add duplicates count. And //    printf ("+%zu duplicates, ", duplicates);
+	{
+		average = ping->time.total / ping->answer_count;
+		stddev = sqrt(ping->time.total_squared / ping->answer_count - average * average);
+		printf ("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n", 
+			ping->time.min, 
+			average, 
+			ping->time.max, 
+			stddev
+		);
+	}
+}
 
 // // Debugging tools
 

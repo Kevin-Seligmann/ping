@@ -36,7 +36,7 @@ NO_COLOR = "\e[0m"
 all: $(OBJ_DIR) $(NAME)
 
 $(NAME): $(OBJ_PATH) Makefile
-	@$(CC) $(FLAGS) $(OBJ_PATH) -o $(NAME)
+	@$(CC) $(FLAGS) $(OBJ_PATH) -o $(NAME) -lm
 	sudo setcap cap_net_raw=eip ./ft_ping
 	@echo $(YELLOW)$(PROJ) - Creating exec:$(NO_COLOR) $(NAME)
 
