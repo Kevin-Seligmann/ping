@@ -54,6 +54,8 @@ static void parse_option(char **argv, int *i, struct s_program_param *params)
 			return get_ttl_option(get_argument(argv, i, &option), params);
 		else if (*option ==  'c')
 			return get_count_option(get_argument(argv, i, &option), params);
+		else if (*option ==  'i')
+			return get_interval_option(get_argument(argv, i, &option), params);
 		else
 			exit_with_help(USAGE_FAILURE, "invalid option -- '%c'", *option);
 		option ++;
@@ -133,6 +135,8 @@ static void parse_full_option(char **argv, int *i, struct s_program_param *param
 		get_iptimestamp_option(get_full_argument(argv, i, "ip-timestamp"), params);
 	else if (matches_full_option(arg, "count", 1))
 		get_count_option(get_full_argument(argv, i, "count"), params);
+	else if (matches_full_option(arg, "interval", 1))
+		get_interval_option(get_full_argument(argv, i, "interval"), params);
 	else
 		exit_with_help(USAGE_FAILURE, "unrecognized option '--%s'", arg);
 }
@@ -161,5 +165,9 @@ void parse(int argc, char **argv, struct s_program_param *params)
 	if (params->destinations == 0)
 	{
 		exit_with_help(USAGE_FAILURE, "missing host operand");
+	}
+	if (params->flags & FTP_FLOOD && params->flags & FTP_INTERVAL)
+	{
+		exit_with_message(EXIT_FAILURE, "-f and -i incompatible options");
 	}
 }

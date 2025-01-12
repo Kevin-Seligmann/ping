@@ -30,10 +30,10 @@
 										// Help -? --help 						- IMPLEMENTED
 										// Preload -l --preload=NUMBER 			- IMPLEMENTED
  										// Timeout -w --timenout=N				- IMPLEMENTED
-										// Linger -W --linger=N					- NO (Useless w.o count)
+										// Linger -W --linger=N					- IMPLEMENTED
 										// Pattern -p --pattern=PATTERN			- IMPLEMENTED
 										// Packet size  -s --size=NUMBER		- IMPLEMENTED
-										// Count -c --count=NUMBER				- NO
+										// Count -c --count=NUMBER				- IMPLEMENTED
 										// -T --tos=N							- IMPLEMENETD
 										// --ttl=N								- IMPLEMENTED
 # define FTP_VERBOSE 0x1				// -v --verbose							- PARTIAL (Should expand when adding more options)
@@ -43,6 +43,7 @@
 # define FTP_IP_TIMESTAMP 0x10			// --ip-timestamp=FLAG					- NO
 # define FTP_QUIET 0x20					// -q --quiet							- IMPLEMENTED
 # define FTP_DEBUG 0x40					// -d --debug							- IMPLEMENTED
+# define FTP_INTERVAL 0x80			// Interval -i --interval=NUMBER 		- IMPLEMENTED
 
 // Defaults
 # define DEF_LINGER 10

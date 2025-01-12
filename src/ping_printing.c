@@ -133,6 +133,7 @@ Send ICMP ECHO_REQUEST packets to network hosts.\n\
 \n\
   -c, --count=NUMBER         stop after sending NUMBER packets\n\
   -d, --debug                set the SO_DEBUG option\n\
+  -i, --interval=NUMBER      wait NUMBER seconds between sending each packet\n\
   -n, --numeric              do not resolve host addresses\n\
   -r, --ignore-routing       send directly to a host on an attached network\n\
       --ttl=N                specify N as time-to-live\n\

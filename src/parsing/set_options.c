@@ -65,6 +65,12 @@ void	get_count_option(char *arg, struct s_program_param *params)
 	params->count = bounded_strtoul_wrapper(arg, COUNT_MAX, COUNT_MIN);
 }
 
+void	get_interval_option(char *arg, struct s_program_param *params)
+{
+	params->flags |= FTP_INTERVAL;
+	params->interval = bounded_strtoul_wrapper(arg, INTERVAL_MAX, INTERVAL_MIN);
+}
+
 void	get_pattern_option(char *arg, struct s_program_param *params)
 {
 	params->pattern = arg;
