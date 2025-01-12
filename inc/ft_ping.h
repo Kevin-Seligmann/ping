@@ -21,8 +21,9 @@
 # define PROGRAM_NAME "ft_ping"
 
 // Program flow
-# define END_CURR_PINGING 1
+# define LISTEN_ONCE 1
 # define END_ALL_PINGING 2
+# define END_CURR_PINGING 2
 # define PINGING 0
 
 // Options
@@ -105,8 +106,8 @@ struct s_ping {
 	struct s_icmp_header *sent_icmp_hdr;
 	struct s_icmp_header *recv_icmp_hdr;
 	struct s_ip_header *ip_hdr;
-	int sequence;
-	int answer_count;
+	size_t sequence;
+	size_t answer_count;
 	long received_bytes;
 	long sent_bytes;
 	void *received_packet_buffer;

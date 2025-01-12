@@ -1,5 +1,7 @@
 #include "ft_ping_main.h"
 
+extern volatile sig_atomic_t status;
+
 void free_resources(struct s_config *config)
 {
 	free(config->ping.sent_packet_buffer);
@@ -23,14 +25,14 @@ static void run_pings(char **args, struct s_config *config)
 		{
 			config->ping.destination = *args;
 			ping(config);
+			if (status == END_CURR_PINGING)
+				status = PINGING;
 			config->params.destinations --;
 		}
 		args ++;
 	}
 }
 
-// TODO: Flip the order of messages with strerror.
-// TODO: parse bug: "-c 5 localhost"
 int main(int argc, char **argv)
 {
 	static struct s_config config;
@@ -43,3 +45,8 @@ int main(int argc, char **argv)
 	free_resources(&config);
 	return EXIT_SUCCESS;
 }
+
+
+// TODO: Flip the order of messages with strerror.
+// TODO: parse bug: "-c 5 localhost"
+// TODO: Change global to only detect the signal

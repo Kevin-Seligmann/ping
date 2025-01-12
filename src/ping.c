@@ -90,6 +90,11 @@ int do_select(struct s_program_param *params, struct s_ping *ping)
 		ping->time.select_timeout.tv_sec = 0;
 		ping->time.select_timeout.tv_usec = 10000;
 	}
+	else if (status == LISTEN_ONCE)
+	{
+		ping->time.select_timeout.tv_sec = params->linger;
+		status = END_CURR_PINGING;
+	}
 	else if (ping->time.usec_to_echo > 0)
 		ping->time.select_timeout.tv_usec = ping->time.usec_to_echo;
 	else
@@ -107,6 +112,7 @@ static void configure_ping(struct s_config *config, struct s_program_param *para
 	ping->time.total_squared = 0;
 	ping->time.effective_interval = 0;
 	ping->time.usec_to_echo = 0;
+	ping->time.select_timeout.tv_sec = 0;
 	if (getaddrinfo(ping->destination, 0, &(params->hints), &(ping->addr)))
 		exit_wmsg_and_free(config, EXIT_FAILURE, "unknown host");
 }
@@ -183,6 +189,8 @@ void do_ping_loop(struct s_config *config)
 	{
 		if (status == PINGING && (config->params.flags & FTP_FLOOD || interval_passed(&config->ping.time)))
 			send_echo_request(config, &config->params, &config->ping);
+		if (config->params.count && config->params.count <= config->ping.sequence)
+			status = LISTEN_ONCE;
 	}
 	check_timeout(&config->params, &config->ping);
 }
@@ -206,7 +214,7 @@ void ping(struct s_config *config)
 	send_preload(config, &config->params, &config->ping);
 	send_echo_request(config, &config->params, &config->ping);
 	config->ping.time.effective_interval = config->params.interval;
- 	while (status == PINGING)
+ 	while (status == PINGING || status == LISTEN_ONCE)
 		do_ping_loop(config);
 	print_result(&config->params, &config->ping);
 	freeaddrinfo(config->ping.addr);

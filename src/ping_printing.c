@@ -57,14 +57,14 @@ void print_result(struct s_program_param *params, struct s_ping *ping)
 	double stddev;
 
 	printf("--- %s ping statistics ---\n", ping->destination);
-	printf("%u packets transmitted, ", ping->sequence);
-	printf("%u packets received, ", ping->answer_count);
+	printf("%lu packets transmitted, ", ping->sequence);
+	printf("%lu packets received, ", ping->answer_count);
 	if (ping->answer_count)
 	{
 		if (ping->answer_count > ping->sequence)
 			printf ("-- somebody is printing forged packets!");
 		else
-			printf ("%d%% packet loss", (((ping->sequence - ping->answer_count) * 100) / ping->sequence));
+			printf ("%d%% packet loss", (int) (((ping->sequence - ping->answer_count) * 100) / ping->sequence));
 	}
 	printf ("\n");
 	if (ping->answer_count &&params->size >=  (int) sizeof(struct timeval)) // TODO: Add duplicates count. And //    printf ("+%zu duplicates, ", duplicates);
