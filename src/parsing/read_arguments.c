@@ -52,6 +52,8 @@ static void parse_option(char **argv, int *i, struct s_program_param *params)
 			return get_tos_option(get_argument(argv, i, &option), params);
 		else if (*option ==  't')
 			return get_ttl_option(get_argument(argv, i, &option), params);
+		else if (*option ==  'c')
+			return get_count_option(get_argument(argv, i, &option), params);
 		else
 			exit_with_help(USAGE_FAILURE, "invalid option -- '%c'", *option);
 		option ++;
@@ -129,6 +131,8 @@ static void parse_full_option(char **argv, int *i, struct s_program_param *param
 		get_ttl_option(get_full_argument(argv, i, "ttl"), params);
 	else if (matches_full_option(arg, "ip-timestamp", 1))
 		get_iptimestamp_option(get_full_argument(argv, i, "ip-timestamp"), params);
+	else if (matches_full_option(arg, "count", 1))
+		get_count_option(get_full_argument(argv, i, "count"), params);
 	else
 		exit_with_help(USAGE_FAILURE, "unrecognized option '--%s'", arg);
 }

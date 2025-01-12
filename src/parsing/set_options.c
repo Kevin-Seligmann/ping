@@ -1,6 +1,6 @@
 #include "ft_ping_parse.h"
 
-static unsigned long bounded_strtoul_wrapper(char *arg, unsigned int max, unsigned int min)
+static unsigned long bounded_strtoul_wrapper(char *arg, size_t max, size_t min)
 {
 	char *ptr;
 	unsigned long result;
@@ -11,7 +11,7 @@ static unsigned long bounded_strtoul_wrapper(char *arg, unsigned int max, unsign
 	{
 		exit_with_message(EXIT_FAILURE, "invalid value (`%s' near `%s')", arg, ptr);
 	}
-	if (result > max)
+	if (max > 0 && result > max)
 	{
 		exit_with_message(EXIT_FAILURE, "option value too big: %s", arg);
 	}
@@ -58,6 +58,11 @@ void	get_tos_option(char *arg, struct s_program_param *params)
 void	get_ttl_option(char *arg, struct s_program_param *params)
 {
 	params->ttl = bounded_strtoul_wrapper(arg, TTL_MAX, TTL_MIN);
+}
+
+void	get_count_option(char *arg, struct s_program_param *params)
+{
+	params->count = bounded_strtoul_wrapper(arg, COUNT_MAX, COUNT_MIN);
 }
 
 void	get_pattern_option(char *arg, struct s_program_param *params)

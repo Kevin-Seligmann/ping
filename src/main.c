@@ -30,7 +30,7 @@ static void run_pings(char **args, struct s_config *config)
 }
 
 // TODO: Flip the order of messages with strerror.
-
+// TODO: parse bug: "-c 5 localhost"
 int main(int argc, char **argv)
 {
 	static struct s_config config;

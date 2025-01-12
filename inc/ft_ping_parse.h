@@ -19,6 +19,9 @@
 # define TOS_MAX 255
 # define TOS_MIN 1
 
+# define COUNT_MAX 0 // No max
+# define COUNT_MIN 0
+
 # define PRELOAD_MAX INT_MAX
 
 # define USAGE_FAILURE 64
@@ -34,6 +37,7 @@ void	get_size_option(char *arg, struct s_program_param *params);
 void	get_tos_option(char *arg, struct s_program_param *params);
 void	get_ttl_option(char *arg, struct s_program_param *params);
 void	get_iptimestamp_option(char *arg, struct s_program_param *params);
+void	get_count_option(char *arg, struct s_program_param *params);
 void	usage(int exit_code);
 
 #endif

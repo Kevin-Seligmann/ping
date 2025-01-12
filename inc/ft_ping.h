@@ -32,6 +32,7 @@
 										// Linger -W --linger=N					- NO (Useless w.o count)
 										// Pattern -p --pattern=PATTERN			- IMPLEMENTED
 										// Packet size  -s --size=NUMBER		- IMPLEMENTED
+										// Count -c --count=NUMBER				- NO
 										// -T --tos=N							- IMPLEMENETD
 										// --ttl=N								- IMPLEMENTED
 # define FTP_VERBOSE 0x1				// -v --verbose							- PARTIAL (Should expand when adding more options)
@@ -125,6 +126,7 @@ struct s_program_param {
 	int interval;
 	int ttl;
 	int tos;
+	size_t count;
 	int iptimestamp;
 	int destinations;
 	char *pattern;
