@@ -131,6 +131,7 @@ void usage(int exit_code)
 Usage: ./ft_ping [OPTION...] HOST ...\n\
 Send ICMP ECHO_REQUEST packets to network hosts.\n\
 \n\
+  -d, --debug                set the SO_DEBUG option\n\
   -n, --numeric              do not resolve host addresses\n\
   -r, --ignore-routing       send directly to a host on an attached network\n\
       --ttl=N                specify N as time-to-live\n\

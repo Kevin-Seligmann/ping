@@ -39,7 +39,8 @@
 # define FTP_NUMERIC 0x4				// -n --numeric							- NO (Useless w.o timestamp)
 # define FTP_BYPASS_ROUTING_TABLE 0x8	// -r --ignore-routing					- IMPLEMENTED
 # define FTP_IP_TIMESTAMP 0x10			// --ip-timestamp=FLAG					- NO
-# define FTP_QUIET 0x20					// -q --quiet
+# define FTP_QUIET 0x20					// -q --quiet							- IMPLEMENTED
+# define FTP_DEBUG 0x40					// -d --debug							- IMPLEMENTED
 
 // Defaults
 # define DEF_LINGER 10

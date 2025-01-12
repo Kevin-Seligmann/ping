@@ -113,6 +113,8 @@ static void configurate_socket(struct s_program_param *params)
 		configurate_socket_failure_w_strerror(params, "%s: setsockopt(BROADCAST)");
 	if(params->flags & FTP_BYPASS_ROUTING_TABLE && setsockopt(params->socketfd, SOL_SOCKET, SO_DONTROUTE, &aux, sizeof(aux)) < 0)
 		configurate_socket_failure_w_strerror(params, "%s: setsockopt(DONTROUTE)");
+	if(params->flags & FTP_DEBUG && setsockopt(params->socketfd, SOL_SOCKET, SO_DEBUG, &aux,  sizeof(aux)) < 0)
+		configurate_socket_failure_w_strerror(params, "%s: setsockopt(DEBUG)");
 	if(params->ttl > 0 && setsockopt(params->socketfd, IPPROTO_IP, IP_TTL, (void *) &(params->ttl), sizeof(params->ttl)) < 0)
 		configurate_socket_failure_w_strerror(params, "%s: setsockopt(TTL)");
 	if(params->tos > 0 && setsockopt(params->socketfd, IPPROTO_IP, IP_TOS, (void *) &(params->tos), sizeof(params->tos)) < 0)
