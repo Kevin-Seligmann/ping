@@ -62,6 +62,7 @@ void	get_ttl_option(char *arg, struct s_program_param *params)
 
 void	get_pattern_option(char *arg, struct s_program_param *params)
 {
+	params->pattern = arg;
 	while (*arg)
 	{
 		if ((*arg >= '0' && *arg <= '9') || (*arg >= 'a' && *arg <= 'z')  || (*arg >= 'A' && *arg <= 'Z'))
@@ -73,7 +74,6 @@ void	get_pattern_option(char *arg, struct s_program_param *params)
 			exit_with_message(EXIT_FAILURE, "error in pattern near %s", arg);
 		}
 	}
-	params->pattern = arg;
 }
 
 void	get_iptimestamp_option(char *arg, struct s_program_param *params)

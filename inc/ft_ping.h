@@ -30,13 +30,13 @@
 										// Preload -l --preload=NUMBER 			- IMPLEMENTED
  										// Timeout -w --timenout=N				- IMPLEMENTED
 										// Linger -W --linger=N					- NO (Useless w.o count)
-										// Pattern -p --pattern=PATTERN			- NO
+										// Pattern -p --pattern=PATTERN			- IMPLEMENTED
 										// Packet size  -s --size=NUMBER		- IMPLEMENTED
 										// -T --tos=N							- IMPLEMENETD
 										// --ttl=N								- IMPLEMENTED
-# define FTP_VERBOSE 0x1				// -v --verbose							- NO
-# define FTP_FLOOD 0x2					// -f --flood							- NO
-# define FTP_NUMERIC 0x4				// -n --numeric							- IMPLEMENTED
+# define FTP_VERBOSE 0x1				// -v --verbose							- PARTIAL (Should expand when adding more options)
+# define FTP_FLOOD 0x2					// -f --flood							- IMPLEMENETD
+# define FTP_NUMERIC 0x4				// -n --numeric							- NO (Useless w.o timestamp)
 # define FTP_BYPASS_ROUTING_TABLE 0x8	// -r --ignore-routing					- IMPLEMENTED
 # define FTP_IP_TIMESTAMP 0x10			// --ip-timestamp=FLAG					- NO
 

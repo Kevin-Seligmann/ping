@@ -54,14 +54,17 @@ static void pad_packet(void *buffer, char *pattern, uint8_t size)
 		patptr = pattern;
 		while (*patptr && size > 0)
 		{
-			*buffptr |= get_byte_from_char(*patptr) << side * 4;
-			side = !side;
-			patptr ++;
+			if (side)
+				*buffptr = (get_byte_from_char(*patptr)  << 4);
+			else
+				*buffptr |= (get_byte_from_char(*patptr));
 			if (!side)
 			{
 				buffptr ++;
 				size --;
 			}
+			side = !side;
+			patptr ++;
 		}
 	}
 }

@@ -29,6 +29,8 @@ static void run_pings(char **args, struct s_config *config)
 	}
 }
 
+// TODO: Flip the order of messages with strerror.
+
 int main(int argc, char **argv)
 {
 	static struct s_config config;

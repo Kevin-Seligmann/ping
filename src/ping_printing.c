@@ -9,6 +9,11 @@ void print_reply(struct s_program_param *params, struct s_ping *ping)
 	// 	options =  (char *) config->received_packet_buffer + 5 * 4;
 	// else
 	//	options = NULL;
+	if (params->flags & FTP_FLOOD)
+	{
+		putchar('\b');
+		return;
+	}
 	printf ("%lu bytes from %s: icmp_seq=%u ttl=%d",
 		ping->received_bytes - (ping->ip_hdr->version_and_ihl & 0xf) * WORD_SIZE_ON_BYTES,
 		inet_ntoa(ping->ip_hdr->source),

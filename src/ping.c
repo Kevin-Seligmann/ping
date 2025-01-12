@@ -84,24 +84,17 @@ int do_select(struct s_program_param *params, struct s_ping *ping)
 	FD_ZERO(&fdset);
 	FD_SET(params->socketfd, &fdset);
 
-	if (ping->time.usec_to_echo > 0)
+	if (params->flags & FTP_FLOOD)
+	{
+		ping->time.select_timeout.tv_sec = 0;
+		ping->time.select_timeout.tv_usec = 10000;
+	}
+	else if (ping->time.usec_to_echo > 0)
 		ping->time.select_timeout.tv_usec = ping->time.usec_to_echo;
 	else
 		ping->time.select_timeout.tv_usec = 0;
 	return select(params->socketfd + 1, &fdset, 0, 0, &ping->time.select_timeout);
 }
-
-// int check_timeout(struct s_config *config)
-// {
-// 	struct timeval timestamp;
-// 	ssize_t us_since_start;
-
-// 	if (config->flags.timeout == 0)
-// 		return 0;
-// 	gettimeofday(&timestamp, 0);
-// 	us_since_start = (timestamp.tv_sec - config->starting_time.tv_sec) * 1000000 + timestamp.tv_usec - config->starting_time.tv_usec;
-// 	return (us_since_start >= config->timeout * 1000000);
-// }
 
 static void configure_ping(struct s_config *config, struct s_program_param *params, struct s_ping *ping)
 {
@@ -146,6 +139,8 @@ static void send_echo_request(struct s_config *config, struct s_program_param *p
 	{
  		printf ("ft_ping: wrote %s %d chars, ret=%lu\n", ping->destination, params->size + ICMP_HDR_SIZE, ping->sent_bytes);
 	}
+	if (params->flags & FTP_FLOOD)
+		putchar('.');
 }
 
 int interval_passed(struct s_timing *time)
@@ -185,7 +180,7 @@ void do_ping_loop(struct s_config *config)
 	}
 	else
 	{
-		if (status == PINGING && interval_passed(&config->ping.time))
+		if (status == PINGING && (config->params.flags & FTP_FLOOD || interval_passed(&config->ping.time)))
 			send_echo_request(config, &config->params, &config->ping);
 	}
 	check_timeout(&config->params, &config->ping);
