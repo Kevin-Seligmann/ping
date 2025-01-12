@@ -27,13 +27,13 @@ static void parse_option(char **argv, int *i, struct s_program_param *params)
 		if (*option == '?' || *option == 'h')
 			usage(0);
 		else if (*option == 'v')
-			params->flags != FTP_VERBOSE;
+			params->flags |= FTP_VERBOSE;
 		else if (*option ==  'f')
-			params->flags != FTP_FLOOD;
+			params->flags |= FTP_FLOOD;
 		else if (*option == 'n')
-			params->flags != FTP_NUMERIC;
+			params->flags |= FTP_NUMERIC;
 		else if (*option == 'r')
-			params->flags != FTP_BYPASS_ROUTING_TABLE;
+			params->flags |= FTP_BYPASS_ROUTING_TABLE;
 		else if (*option ==  'l')
 			return get_preload_option(get_argument(argv, i, &option), params);
 		else if (*option == 'w')
@@ -98,13 +98,13 @@ static void parse_full_option(char **argv, int *i, struct s_program_param *param
 	if (matches_full_option(arg, "help", 0))
 		usage(0);
 	else if (matches_full_option(arg, "verbose", 0))
-		params->flags != FTP_VERBOSE;
+		params->flags |= FTP_VERBOSE;
 	else if (matches_full_option(arg, "flood", 0))
-		params->flags != FTP_FLOOD;
+		params->flags |= FTP_FLOOD;
 	else if (matches_full_option(arg, "numeric", 0))
-		params->flags != FTP_NUMERIC;
+		params->flags |= FTP_NUMERIC;
 	else if (matches_full_option(arg, "ignore-routing", 0))
-		params->flags != FTP_BYPASS_ROUTING_TABLE;
+		params->flags |= FTP_BYPASS_ROUTING_TABLE;
 	else if (matches_full_option(arg, "preload", 1))
 		get_preload_option(get_full_argument(argv, i, "preload"), params);
 	else if (matches_full_option(arg, "timeout", 1))
