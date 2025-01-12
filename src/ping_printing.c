@@ -1,11 +1,5 @@
 #include "ft_ping.h"
 
-// T2 > T1 (T2 after T1)
-unsigned long get_time_diff_us(struct timeval t1, struct timeval t2)
-{
-	return (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
-}
-
 void print_reply(struct s_program_param *params, struct s_ping *ping)
 {
 	unsigned long time;
@@ -23,7 +17,7 @@ void print_reply(struct s_program_param *params, struct s_ping *ping)
 	);
 	if ((long unsigned) params->size >= sizeof(struct timeval))
 	{
-		printf (" time=%.3f ms", ping->time.asnwer_time);
+		printf (" time=%.3f ms", ping->time.answer_time);
 	}
 	printf ("\n");
 }

@@ -11,10 +11,9 @@ void set_defaults(struct s_program_param *params)
     params->hints.ai_family = AF_INET;
     params->hints.ai_socktype = SOCK_RAW;
     params->hints.ai_protocol = protocol->p_proto;
-	params->interval = 1;
-	params->size = 56;
-	params->interval = 1000;
-	// input->linger??
+	params->size = DEF_SIZE;
+	params->interval = DEF_INTERVAL;
+	params->linger = DEF_LINGER;
 }
 
 static void allocate_packet_buffers(struct s_config *config)
@@ -119,7 +118,7 @@ static void configurate_socket(struct s_program_param *params)
 		configurate_timestamp_option(params);
 }
 
-static void set_ping_shared_configuration(struct s_ping *ping)
+static void set_ping_shared_configuration(struct s_program_param *params, struct s_ping *ping)
 {
 	ping->sent_icmp_hdr = (struct s_icmp_header *) ping->sent_packet_buffer;
 	ping->ip_hdr = (struct s_ip_header *) ping->received_packet_buffer;
@@ -133,6 +132,6 @@ void prepare_pinging(struct s_config *config)
 	configurate_socket(&config->params);
 	allocate_packet_buffers(config);
 	fill_received_packet_buffer(config);
-	set_ping_shared_configuration(&config->ping);
+	set_ping_shared_configuration(&config->params, &config->ping);
 }
 

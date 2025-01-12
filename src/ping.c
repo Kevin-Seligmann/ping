@@ -39,6 +39,26 @@ int validate_ping(struct s_ping *ping)
 	return 1;
 }
 
+// T2 > T1 (T2 after T1)
+static unsigned long get_time_diff_us(struct timeval t1, struct timeval t2)
+{
+	return (t2.tv_sec - t1.tv_sec) * 1000000 + (t2.tv_usec - t1.tv_usec);
+}
+
+static void set_successful_ping_data(struct s_ping *ping, struct timeval timestamp)
+{
+	ping->answer_count ++;
+	ping->time.received_timestamp = timestamp;
+	ping->time.answer_time = get_time_diff_us(* ((struct timeval *) ((char *) ping->recv_icmp_hdr + ICMP_HDR_SIZE)), ping->time.received_timestamp) / 1000.;
+	ping->time.max = fmax(ping->time.max, ping->time.answer_time);
+	if (ping->time.min)
+		ping->time.min = fmin(ping->time.min, ping->time.answer_time);
+	else
+		ping->time.min = ping->time.answer_time;
+	ping->time.total += ping->time.answer_time;
+	ping->time.total_squared += ping->time.answer_time * ping->time.answer_time;
+}
+
 void listen_echo_reply(struct s_program_param *params, struct s_ping *ping)
 {
 	struct timeval timestamp;
@@ -52,50 +72,24 @@ void listen_echo_reply(struct s_program_param *params, struct s_ping *ping)
 		&ping->addr->ai_addrlen);
 	gettimeofday(&timestamp, 0);
 	if (!validate_ping(ping))
-	{
-		listen_echo_reply(params, ping);
 		return ;
-	}
-	ping->answer_count ++;
-	ping->time.received_timestamp = timestamp;
-	ping->time.asnwer_time = get_time_diff_us(* ((struct timeval *) ((char *) ping->recv_icmp_hdr + ICMP_HDR_SIZE)), ping->time.received_timestamp) / 1000.;
-	ping->time.max = fmax(ping->time.max, ping->time.asnwer_time);
-	if (ping->time.min)
-		ping->time.min = fmin(ping->time.min, ping->time.asnwer_time);
-	else
-		ping->time.min = ping->time.asnwer_time;
-	ping->time.total += ping->time.asnwer_time;
-	ping->time.total_squared += ping->time.asnwer_time * ping->time.asnwer_time;
+	set_successful_ping_data(ping, timestamp);
 	print_reply(params, ping);
-	sleep(1);
 }
 
-// int send_preload(struct s_config *config)
-// {
-// 	int count;
+int do_select(struct s_program_param *params, struct s_ping *ping)
+{
+	fd_set fdset;
 
-// 	count = 0;
-// 	while (count < config->preload)
-// 	{
-// 		if (send_echo_request(config) == END_ALL_PINGING)
-// 			return (END_ALL_PINGING);
-// 		count ++;
-// 	}
-// 	return 0;
-// }
+	FD_ZERO(&fdset);
+	FD_SET(params->socketfd, &fdset);
 
-// int do_select(struct s_config *config)
-// {
-// 	struct timeval linger;
-// 	fd_set fdset;
-
-// 	FD_ZERO(&fdset);
-// 	FD_SET(config->socketfd, &fdset);
-
-// 	linger.tv_sec = 0;
-// 	linger.tv_usec = config->linger;
-// 	return select(config->socketfd + 1, &fdset, 0, 0, &linger);
-// }
+	if (ping->time.usec_to_echo > 0)
+		ping->time.select_timeout.tv_usec = ping->time.usec_to_echo;
+	else
+		ping->time.select_timeout.tv_usec = 0;
+	return select(params->socketfd + 1, &fdset, 0, 0, &ping->time.select_timeout);
+}
 
 // int check_timeout(struct s_config *config)
 // {
@@ -117,6 +111,8 @@ static void configure_ping(struct s_config *config, struct s_program_param *para
 	ping->time.min = 0;
 	ping->time.total = 0;
 	ping->time.total_squared = 0;
+	ping->time.effective_interval = 0;
+	ping->time.usec_to_echo = 0;
 	if (getaddrinfo(ping->destination, 0, &(params->hints), &(ping->addr)))
 		exit_wmsg_and_free(config, EXIT_FAILURE, "unknown host");
 }
@@ -125,14 +121,13 @@ static void build_icmp_header(struct s_program_param *params, struct s_ping *pin
 {
 	ping->sent_icmp_hdr->checksum = 0;
 	ping->sent_icmp_hdr->sequence = ping->sequence;
+	gettimeofday(&ping->time.last_sent, NULL);
 	if (params->size >= (int) sizeof(struct timeval))
 	{
-		memset(ping->sent_packet_buffer + ICMP_HDR_SIZE, 0, sizeof(struct timeval));
-    	gettimeofday((struct timeval *) (ping->sent_packet_buffer + ICMP_HDR_SIZE), NULL);
+    	*(struct timeval *) (ping->sent_packet_buffer + ICMP_HDR_SIZE) = ping->time.last_sent;
 	}
 	ping->sent_icmp_hdr->checksum = checksum(ping->sent_packet_buffer, params->size + ICMP_HDR_SIZE);
 }
-
 
 static void send_echo_request(struct s_config *config, struct s_program_param *params, struct s_ping *ping)
 {
@@ -153,30 +148,68 @@ static void send_echo_request(struct s_config *config, struct s_program_param *p
 	}
 }
 
+int interval_passed(struct s_timing *time)
+{
+	size_t usec_since_last;
+
+	usec_since_last = (time->present.tv_sec - time->last_sent.tv_sec) * 1000000 + (time->present.tv_usec - time->last_sent.tv_usec);
+	time->usec_to_echo = time->effective_interval * 1000000 - usec_since_last;
+	return time->usec_to_echo <= 0;
+}
+
+void check_timeout(struct s_program_param *params, struct s_ping *ping)
+{
+	size_t usec_since_start;
+
+	if (!params->timeout)
+		return ;
+	usec_since_start = (ping->time.present.tv_sec - ping->time.starting_time.tv_sec) * 1000000 + ping->time.present.tv_usec - ping->time.starting_time.tv_usec;
+	if (usec_since_start > (unsigned int) params->timeout * 1000000)
+		status = END_ALL_PINGING;
+}
+
 void do_ping_loop(struct s_config *config)
 {
-	// if (check_timeout(config))
-	// 	return exit_pinging(config, 0);
-	// select_reply = do_select(config);
-	// if (select_reply > 0)
-	listen_echo_reply(&config->params, &config->ping);
-	// else if (select_reply < 0)
-	// {
-	// 	fprintf(stderr, "ft_ping: select failed\n");
-	// 	return exit_pinging(config, END_ALL_PINGING);
-	// }
-	// else 
-	// {
-	if (status == PINGING)
-		send_echo_request(config, &config->params, &config->ping);
+	int select_reply;
+
+	select_reply = do_select(&config->params, &config->ping);
+	gettimeofday(&config->ping.time.present, 0);
+	if (select_reply > 0)
+	{
+		listen_echo_reply(&config->params, &config->ping);
+	}
+	else if (select_reply < 0)
+	{
+		if (errno != EINTR)
+	 		exit_wmsg_and_free(config, EXIT_FAILURE, "select failed");
+	}
+	else
+	{
+		if (status == PINGING && interval_passed(&config->ping.time))
+			send_echo_request(config, &config->params, &config->ping);
+	}
+	check_timeout(&config->params, &config->ping);
+}
+
+void send_preload(struct s_config *config, struct s_program_param *params, struct s_ping *ping)
+{
+	int count;
+
+	count = 0;
+	while (count < params->preload)
+	{
+		send_echo_request(config, params, ping);
+		count ++;
+	}
 }
 
 void ping(struct s_config *config)
 {
 	configure_ping(config, &config->params, &config->ping);
 	print_meta(&config->params, &config->ping);
-	// send_preload(config);
+	send_preload(config, &config->params, &config->ping);
 	send_echo_request(config, &config->params, &config->ping);
+	config->ping.time.effective_interval = config->params.interval;
  	while (status == PINGING)
 		do_ping_loop(config);
 	print_result(&config->params, &config->ping);

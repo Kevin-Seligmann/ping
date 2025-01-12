@@ -16,6 +16,7 @@ static int is_address(char *str)
 
 static void run_pings(char **args, struct s_config *config)
 {
+	gettimeofday(&config->ping.time.starting_time, 0);
 	while (config->params.destinations > 0)
 	{
 		if (is_address(*args))

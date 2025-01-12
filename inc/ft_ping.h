@@ -26,19 +26,24 @@
 # define PINGING 0
 
 // Options
-										// Help -? --help
-										// Preload -l --preload=NUMBER 
- 										// Timeout -w --timenout=N
-										// Linger -W --linger=N
-										// Pattern -p --pattern=PATTERN
-										// Packet size  -s --size=NUMBER
-										// -T --tos=N
-										// --ttl=N
-# define FTP_VERBOSE 0x1				// -v --verbose
-# define FTP_FLOOD 0x2					// -f --flood
-# define FTP_NUMERIC 0x4				// -n --numeric 
-# define FTP_BYPASS_ROUTING_TABLE 0x8	// -r --ignore-routing
-# define FTP_IP_TIMESTAMP 0x10			// --ip-timestamp=FLAG
+										// Help -? --help 						- IMPLEMENTED
+										// Preload -l --preload=NUMBER 			- IMPLEMENTED
+ 										// Timeout -w --timenout=N				- IMPLEMENTED
+										// Linger -W --linger=N					- NO (Useless w.o count)
+										// Pattern -p --pattern=PATTERN			- NO
+										// Packet size  -s --size=NUMBER		- IMPLEMENTED
+										// -T --tos=N							- IMPLEMENETD
+										// --ttl=N								- IMPLEMENTED
+# define FTP_VERBOSE 0x1				// -v --verbose							- NO
+# define FTP_FLOOD 0x2					// -f --flood							- NO
+# define FTP_NUMERIC 0x4				// -n --numeric							- IMPLEMENTED
+# define FTP_BYPASS_ROUTING_TABLE 0x8	// -r --ignore-routing					- IMPLEMENTED
+# define FTP_IP_TIMESTAMP 0x10			// --ip-timestamp=FLAG					- NO
+
+// Defaults
+# define DEF_LINGER 10
+# define DEF_SIZE 56
+# define DEF_INTERVAL 1
 
 // Ip timestamp options
 # define TSONLY_TS 0
@@ -76,8 +81,14 @@ struct s_icmp_header {
 
 // Ping timing information
 struct s_timing {
+	struct timeval starting_time;
+	struct timeval select_timeout;
 	struct timeval received_timestamp;
-	double asnwer_time;
+	struct timeval last_sent;
+	struct timeval present;
+	ssize_t usec_to_echo;
+	size_t effective_interval;
+	double answer_time;
 	double min;
 	double max;
 	double total;
@@ -122,7 +133,6 @@ struct s_config {
 	struct s_ping ping;
 };
 
-unsigned long get_time_diff_us(struct timeval t1, struct timeval t2);
 void print_meta(struct s_program_param *params, struct s_ping *ping);
 void print_reply(struct s_program_param *params, struct s_ping *ping);
 void print_result(struct s_program_param *params, struct s_ping *ping);
