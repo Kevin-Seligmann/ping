@@ -141,6 +141,61 @@ static void parse_full_option(char **argv, int *i, struct s_program_param *param
 		exit_with_help(USAGE_FAILURE, "unrecognized option '--%s'", arg);
 }
 
+static int should_skip(char *str)
+{
+	char last_char;
+
+	if (str[0] == '-' && str[1] != '-')
+	{
+		last_char = str[strlen(str) - 1];
+		if (last_char ==  'l')
+			return 1;
+		else if (last_char == 'w')
+			return 1;
+		else if (last_char == 'W')
+			return 1;
+		else if (last_char == 'p')
+			return 1;
+		else if (last_char ==  's')
+			return 1;
+		else if (last_char ==  'T')
+			return 1;
+		else if (last_char ==  't')
+			return 1;
+		else if (last_char ==  'c')
+			return 1;
+		else if (last_char ==  'i')
+			return 1;
+		return 0;
+	}
+	if (matches_full_option(str + 2, "verbose", 0))
+		return 0;
+	else if (matches_full_option(str + 2, "flood", 0))
+		return 0;
+	else if (matches_full_option(str + 2, "numeric", 0))
+		return 0;
+	else if (matches_full_option(str + 2, "ignore-routing", 0))
+		return 0;
+	else if (matches_full_option(str + 2, "quiet", 0))
+		return 0;
+	else if (matches_full_option(str + 2, "debug", 0))
+		return 0;
+	if (strchr(str, '='))
+		return 0;
+	return 1;
+}
+
+int is_address(char ***args, char *str)
+{
+	if (strlen(str) > 1 && str[0] == '-')
+	{
+		if (should_skip(str))
+			(*args) ++;
+		return 0;
+	}
+	return 1;
+}
+
 void parse(int argc, char **argv, struct s_program_param *params)
 {
 	int i;

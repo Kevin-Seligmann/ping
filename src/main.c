@@ -9,19 +9,12 @@ void free_resources(struct s_config *config)
 	close(config->params.socketfd);
 }
 
-static int is_address(char *str)
-{
-	if (strlen(str) > 1 && str[0] == '-')
-		return 0;
-	return 1;
-}
-
 static void run_pings(char **args, struct s_config *config)
 {
 	gettimeofday(&config->ping.time.starting_time, 0);
 	while (config->params.destinations > 0)
 	{
-		if (is_address(*args))
+		if (is_address(&args, *args))
 		{
 			config->ping.destination = *args;
 			ping(config);
@@ -50,4 +43,3 @@ int main(int argc, char **argv)
 // TODO: Flip the order of messages with strerror.
 // TODO: parse bug: "-c 5 localhost"
 // TODO: Change global to only detect the signal
-// TODO: Fix being able to put doubles on arguments. (Interval)

@@ -23,7 +23,7 @@
 // Program flow
 # define LISTEN_ONCE 1
 # define END_ALL_PINGING 2
-# define END_CURR_PINGING 2
+# define END_CURR_PINGING 3
 # define PINGING 0
 
 // Options
