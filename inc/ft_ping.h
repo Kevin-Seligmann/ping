@@ -27,6 +27,8 @@
 # define PINGING 0
 
 // Options
+# define OPTIONS_COUNT 18
+
 										// Help -? --help 						- IMPLEMENTED
 										// Version -V --version 				- IMPLEMENTED
 										// Preload -l --preload=NUMBER 			- IMPLEMENTED
@@ -135,9 +137,19 @@ struct s_program_param {
 	char *pattern;
 };
 
+// Struct holding options utils
+struct s_options {
+	int char_name;
+	char *str_name;
+	void (*action)(void);
+	void (*argument_getter)(char *, struct s_program_param *);
+	int flag_value;
+};
+
 struct s_config {
 	struct s_program_param params;
 	struct s_ping ping;
+	struct s_options *options;
 };
 
 void print_meta(struct s_program_param *params, struct s_ping *ping);
@@ -148,5 +160,6 @@ void exit_with_help(int exit_code, const char *exit_msg, ...);
 int return_with_message(int return_code, const char *exit_msg, ...);
 void free_resources(struct s_config *config);
 void exit_wmsg_and_free(struct s_config *config, int exit_code, char *exit_msg, ...);
+void set_options(struct s_options **options);
 
 #endif

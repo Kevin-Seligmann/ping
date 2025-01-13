@@ -1,5 +1,30 @@
 #include "ft_ping_parse.h"
 
+void set_options(struct s_options **options)
+{
+	static struct s_options opt[OPTIONS_COUNT] = {
+	{.char_name = 'c', .str_name = "count", .action = NULL, .argument_getter = get_count_option, .flag_value = 0},
+	{.char_name = 'd', .str_name = "debug", .action = NULL, .argument_getter = NULL, .flag_value = FTP_DEBUG},
+	{.char_name = 'l', .str_name = "preload", .action = NULL, .argument_getter = get_preload_option, .flag_value = 0},
+	{.char_name = 'w', .str_name = "timeout", .action = NULL, .argument_getter = get_timeout_option, .flag_value = 0},
+	{.char_name = 'W', .str_name = "linger", .action = NULL, .argument_getter = get_linger_option, .flag_value = 0},
+	{.char_name = 'p', .str_name = "pattern", .action = NULL, .argument_getter = get_pattern_option, .flag_value = 0},
+	{.char_name = 's', .str_name = "size", .action = NULL, .argument_getter = get_size_option, .flag_value = 0},
+	{.char_name = 'T', .str_name = "tos", .action = NULL, .argument_getter = get_tos_option, .flag_value = 0},
+	{.char_name = 0, .str_name = "ttl", .action = NULL, .argument_getter = get_ttl_option, .flag_value = 0},
+	{.char_name = 'v', .str_name = "verbose", .action = NULL, .argument_getter = NULL, .flag_value = FTP_VERBOSE},
+	{.char_name = 'f', .str_name = "flood", .action = NULL, .argument_getter = NULL, .flag_value = FTP_FLOOD},
+	{.char_name = 'n', .str_name = "numeric", .action = NULL, .argument_getter = NULL, .flag_value = FTP_NUMERIC},
+	{.char_name = 'r', .str_name = "ignore-routing", .action = NULL, .argument_getter = NULL, .flag_value = FTP_BYPASS_ROUTING_TABLE},
+	{.char_name = 0, .str_name = "ip-timestamp", .action = NULL, .argument_getter = get_iptimestamp_option, .flag_value = FTP_IP_TIMESTAMP},
+	{.char_name = 'q', .str_name = "quiet", .action = NULL, .argument_getter = NULL, .flag_value = FTP_QUIET},
+	{.char_name = 'i', .str_name = "interval", .action = NULL, .argument_getter = get_interval_option, .flag_value = FTP_INTERVAL},
+	{.char_name = '?', .str_name = "help", .action = usage, .argument_getter = NULL, .flag_value = 0},
+	{.char_name = 'V', .str_name = "version", .action = version, .argument_getter = NULL, .flag_value = 0},
+	};
+	*options = opt;
+}
+
 static char *get_argument(char **argv, int *i, char** option)
 {
 	(*option) ++;
@@ -17,54 +42,36 @@ static char *get_argument(char **argv, int *i, char** option)
 	return NULL;
 }
 
-static void parse_option(char **argv, int *i, struct s_program_param *params)
+static void parse_option(char **argv, int *i, struct s_program_param *params, struct s_options *opts)
 {
 	char *option;
+	int opt_ind;
+	struct s_options *opt;
 
 	option = argv[*i] + 1;
+	opt_ind = 0;
 	while (*option)
 	{
-		if (*option == '?' || *option == 'h')
-			usage(EXIT_SUCCESS);
-		else if (*option == 'V')
-			version(EXIT_SUCCESS);
-		else if (*option == 'v')
-			params->flags |= FTP_VERBOSE;
-		else if (*option ==  'f')
-			params->flags |= FTP_FLOOD;
-		else if (*option == 'n')
-			params->flags |= FTP_NUMERIC;
-		else if (*option == 'r')
-			params->flags |= FTP_BYPASS_ROUTING_TABLE;
-		else if (*option == 'q')
-			params->flags |= FTP_QUIET;
-		else if (*option == 'd')
-			params->flags |= FTP_DEBUG;
-		else if (*option ==  'l')
-			return get_preload_option(get_argument(argv, i, &option), params);
-		else if (*option == 'w')
-			return get_linger_option(get_argument(argv, i, &option), params);
-		else if (*option == 'W')
-			return get_timeout_option(get_argument(argv, i, &option), params);
-		else if (*option == 'p')
-			return get_pattern_option(get_argument(argv, i, &option), params);
-		else if (*option ==  's')
-			return get_size_option(get_argument(argv, i, &option), params);
-		else if (*option ==  'T')
-			return get_tos_option(get_argument(argv, i, &option), params);
-		else if (*option ==  't')
-			return get_ttl_option(get_argument(argv, i, &option), params);
-		else if (*option ==  'c')
-			return get_count_option(get_argument(argv, i, &option), params);
-		else if (*option ==  'i')
-			return get_interval_option(get_argument(argv, i, &option), params);
-		else
+		for (opt_ind = 0; opt_ind < OPTIONS_COUNT; opt_ind ++)
+		{
+			opt = &(opts[opt_ind]);
+			if (opt->char_name != *option)
+				continue ;
+			if (opt->flag_value)
+				params->flags |= opt->flag_value;
+			if (opt->argument_getter)
+				return opt->argument_getter(get_argument(argv, i, &option), params);
+			if (opt->action)
+				opt->action();
+			break ;
+		}
+		if (opt_ind == OPTIONS_COUNT)
 			exit_with_help(USAGE_FAILURE, "invalid option -- '%c'", *option);
 		option ++;
 	}
 }
 
-static int matches_full_option(char *arg, char *option, int needs_argument)
+static int matches_full_option(char *arg, char *option, void (*argument_getter)(char *, struct s_program_param *))
 {
 	int ind;
 
@@ -77,7 +84,7 @@ static int matches_full_option(char *arg, char *option, int needs_argument)
 		return 0;
 	if (arg[ind] == '=')
 	{
-		if (!needs_argument)
+		if (!argument_getter)
 		{
 			exit_with_help(USAGE_FAILURE, "option '--%s' doesn't allow an argument", option);
 		}
@@ -100,132 +107,94 @@ static char *get_full_argument(char **argv, int *i, char *option)
 	return NULL;
 }
 
-static void parse_full_option(char **argv, int *i, struct s_program_param *params)
+static void parse_full_option(char **argv, int *i, struct s_program_param *params, struct s_options *opts)
 {
 	char *arg;
+	int opt_ind;
+	struct s_options *opt;
 
 	arg = argv[*i] + 2;
-	if (matches_full_option(arg, "help", 0))
-		usage(EXIT_SUCCESS);
-	else if (matches_full_option(arg, "version", 0))
-		version(EXIT_SUCCESS);
-	else if (matches_full_option(arg, "verbose", 0))
-		params->flags |= FTP_VERBOSE;
-	else if (matches_full_option(arg, "flood", 0))
-		params->flags |= FTP_FLOOD;
-	else if (matches_full_option(arg, "numeric", 0))
-		params->flags |= FTP_NUMERIC;
-	else if (matches_full_option(arg, "ignore-routing", 0))
-		params->flags |= FTP_BYPASS_ROUTING_TABLE;
-	else if (matches_full_option(arg, "quiet", 0))
-		params->flags |= FTP_QUIET;
-	else if (matches_full_option(arg, "debug", 0))
-		params->flags |= FTP_DEBUG;
-	else if (matches_full_option(arg, "preload", 1))
-		get_preload_option(get_full_argument(argv, i, "preload"), params);
-	else if (matches_full_option(arg, "timeout", 1))
-		get_timeout_option(get_full_argument(argv, i, "timeout"), params);
-	else if (matches_full_option(arg, "linger", 1))
-		get_linger_option(get_full_argument(argv, i, "linger"), params);
-	else if (matches_full_option(arg, "pattern", 1))
-		get_pattern_option(get_full_argument(argv, i, "pattern"), params);
-	else if (matches_full_option(arg, "size", 1))
-		get_size_option(get_full_argument(argv, i, "size"), params);
-	else if (matches_full_option(arg, "tos", 1))
-		get_tos_option(get_full_argument(argv, i, "tos"), params);
-	else if (matches_full_option(arg, "ttl", 1))
-		get_ttl_option(get_full_argument(argv, i, "ttl"), params);
-	else if (matches_full_option(arg, "ip-timestamp", 1))
-		get_iptimestamp_option(get_full_argument(argv, i, "ip-timestamp"), params);
-	else if (matches_full_option(arg, "count", 1))
-		get_count_option(get_full_argument(argv, i, "count"), params);
-	else if (matches_full_option(arg, "interval", 1))
-		get_interval_option(get_full_argument(argv, i, "interval"), params);
-	else
-		exit_with_help(USAGE_FAILURE, "unrecognized option '--%s'", arg);
+	for (opt_ind = 0; opt_ind < OPTIONS_COUNT; opt_ind ++)
+	{
+		opt = &(opts[opt_ind]);
+		if (matches_full_option(arg, opt->str_name, opt->argument_getter))
+		{
+			if (opt->flag_value)
+				params->flags |= opt->flag_value;
+			if (opt->argument_getter)
+				opt->argument_getter(get_full_argument(argv, i, opt->str_name), params);
+			if (opt->action)
+				opt->action();
+			return ;
+		}
+	}
+	exit_with_help(USAGE_FAILURE, "unrecognized option '--%s'", arg);
 }
 
-static int should_skip(char *str)
+static int should_skip(char *str, struct s_options *opts)
 {
 	char last_char;
+	int	opt_ind;
+	struct s_options *opt;
 
 	if (str[0] == '-' && str[1] != '-')
 	{
 		last_char = str[strlen(str) - 1];
-		if (last_char ==  'l')
-			return 1;
-		else if (last_char == 'w')
-			return 1;
-		else if (last_char == 'W')
-			return 1;
-		else if (last_char == 'p')
-			return 1;
-		else if (last_char ==  's')
-			return 1;
-		else if (last_char ==  'T')
-			return 1;
-		else if (last_char ==  't')
-			return 1;
-		else if (last_char ==  'c')
-			return 1;
-		else if (last_char ==  'i')
-			return 1;
+		for (opt_ind = 0; opt_ind < OPTIONS_COUNT; opt_ind ++)
+		{
+			opt = &(opts[opt_ind]);
+			if (opt->char_name == last_char && opt->argument_getter)
+				return 1;
+		}
 		return 0;
 	}
-	if (matches_full_option(str + 2, "verbose", 0))
-		return 0;
-	else if (matches_full_option(str + 2, "flood", 0))
-		return 0;
-	else if (matches_full_option(str + 2, "numeric", 0))
-		return 0;
-	else if (matches_full_option(str + 2, "ignore-routing", 0))
-		return 0;
-	else if (matches_full_option(str + 2, "quiet", 0))
-		return 0;
-	else if (matches_full_option(str + 2, "debug", 0))
-		return 0;
-	if (strchr(str, '='))
-		return 0;
+	for (opt_ind = 0; opt_ind < OPTIONS_COUNT; opt_ind ++)
+	{
+		opt = &(opts[opt_ind]);
+		if (!opt->argument_getter && matches_full_option(str + 2, opt->str_name, 0))
+			return 0;
+	}
 	return 1;
 }
 
-int is_address(char ***args, char *str)
+int is_address(char ***args, char *str, struct s_options *opts)
 {
 	if (strlen(str) > 1 && str[0] == '-')
 	{
-		if (should_skip(str))
+		if (should_skip(str, opts))
 			(*args) ++;
 		return 0;
 	}
 	return 1;
 }
 
-void parse(int argc, char **argv, struct s_program_param *params)
+void parse(int argc, char **argv, struct s_config *config)
 {
 	int i;
 
+	set_options(&config->options);
 	i = 1;
 	while (i < argc)
 	{
 		if (strlen(argv[i]) > 2 && argv[i][0] == '-' && argv[i][1] == '-')
 		{
-			parse_full_option(argv, &i, params);
+			parse_full_option(argv, &i, &config->params, config->options);
 		}
 		else if (argv[i][0] == '-' && strlen(argv[i]) > 1)
 		{
-			parse_option(argv, &i, params);
+			parse_option(argv, &i, &config->params, config->options);
 		}
 		else
 		{
-			params->destinations ++;
+			config->params.destinations ++;
 		}
 		i ++;
 	}
-	if (params->destinations == 0)
+	if (config->params.destinations == 0)
 	{
 		exit_with_help(USAGE_FAILURE, "missing host operand");
 	}
-	if (params->flags & FTP_FLOOD && params->flags & FTP_INTERVAL)
+	if (config->params.flags & FTP_FLOOD && config->params.flags & FTP_INTERVAL)
 	{
 		exit_with_message(EXIT_FAILURE, "-f and -i incompatible options");
 	}

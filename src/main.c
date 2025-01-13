@@ -14,7 +14,7 @@ static void run_pings(char **args, struct s_config *config)
 	gettimeofday(&config->ping.time.starting_time, 0);
 	while (config->params.destinations > 0)
 	{
-		if (is_address(&args, *args))
+		if (is_address(&args, *args, config->options))
 		{
 			config->ping.destination = *args;
 			ping(config);
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
 	set_signal();
 	set_defaults(&config.params);
-	parse(argc, argv, &config.params);
+	parse(argc, argv, &config.params, config.options);
 	prepare_pinging(&config);
 	run_pings(argv + 1, &config);
 	free_resources(&config);

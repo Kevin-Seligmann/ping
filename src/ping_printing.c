@@ -125,7 +125,7 @@ void print_result(struct s_program_param *params, struct s_ping *ping)
 //     print_icmp_header(&pkt->icmp_header, ntohs(pkt->ip_header.length) - 8 - 20);
 // }
 
-void usage(int exit_code)
+void usage()
 {
 	printf("\
 Usage: ./ft_ping [OPTION...] HOST ...\n\
@@ -157,11 +157,11 @@ Mandatory or optional arguments to long options are also mandatory or optional\n
 for any corresponding short options.\n\
 \n\
 ");
-	exit(exit_code);
+	exit(EXIT_SUCCESS);
 }
 
-void version(int exit_code)
+void version()
 {
 	printf("School project made by Kevin Seligmann for 42. Based on ineutils-2.0's ping.\n\"");
-	exit (exit_code);
+	exit (EXIT_SUCCESS);
 }
