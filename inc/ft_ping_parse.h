@@ -43,5 +43,6 @@ void	get_iptimestamp_option(char *arg, struct s_program_param *params);
 void	get_count_option(char *arg, struct s_program_param *params);
 void 	get_interval_option(char *arg, struct s_program_param *params);
 void	usage(int exit_code);
+void	version(int exit_code);
 
 #endif

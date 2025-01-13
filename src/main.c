@@ -41,5 +41,4 @@ int main(int argc, char **argv)
 
 
 // TODO: Flip the order of messages with strerror.
-// TODO: parse bug: "-c 5 localhost"
 // TODO: Change global to only detect the signal

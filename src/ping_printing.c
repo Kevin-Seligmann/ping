@@ -151,11 +151,17 @@ Send ICMP ECHO_REQUEST packets to network hosts.\n\
   -s, --size=NUMBER          send NUMBER data octets\n\
 \n\
   -?, -h, --help             give this help list\n\
+  -V, --version              print program version\n\
 \n\
 Mandatory or optional arguments to long options are also mandatory or optional\n\
 for any corresponding short options.\n\
 \n\
-School project made by Kevin Seligmann for 42. Based on ineutils-2.0's ping.\n\
 ");
 	exit(exit_code);
+}
+
+void version(int exit_code)
+{
+	printf("School project made by Kevin Seligmann for 42. Based on ineutils-2.0's ping.\n\"");
+	exit (exit_code);
 }

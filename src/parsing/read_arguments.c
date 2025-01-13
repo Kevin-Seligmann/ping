@@ -25,7 +25,9 @@ static void parse_option(char **argv, int *i, struct s_program_param *params)
 	while (*option)
 	{
 		if (*option == '?' || *option == 'h')
-			usage(0);
+			usage(EXIT_SUCCESS);
+		else if (*option == 'V')
+			version(EXIT_SUCCESS);
 		else if (*option == 'v')
 			params->flags |= FTP_VERBOSE;
 		else if (*option ==  'f')
@@ -104,7 +106,9 @@ static void parse_full_option(char **argv, int *i, struct s_program_param *param
 
 	arg = argv[*i] + 2;
 	if (matches_full_option(arg, "help", 0))
-		usage(0);
+		usage(EXIT_SUCCESS);
+	else if (matches_full_option(arg, "version", 0))
+		version(EXIT_SUCCESS);
 	else if (matches_full_option(arg, "verbose", 0))
 		params->flags |= FTP_VERBOSE;
 	else if (matches_full_option(arg, "flood", 0))

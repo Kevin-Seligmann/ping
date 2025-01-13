@@ -28,6 +28,7 @@
 
 // Options
 										// Help -? --help 						- IMPLEMENTED
+										// Version -V --version 				- IMPLEMENTED
 										// Preload -l --preload=NUMBER 			- IMPLEMENTED
  										// Timeout -w --timenout=N				- IMPLEMENTED
 										// Linger -W --linger=N					- IMPLEMENTED
