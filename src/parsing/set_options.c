@@ -1,5 +1,27 @@
 #include "ft_ping_parse.h"
 
+static double bounded_strtod_wrapper(char *arg, size_t max, size_t min)
+{
+	char *ptr;
+	double result;
+
+	ptr = NULL;
+	result = strtod(arg, &ptr);
+	if (*ptr)
+	{
+		exit_with_message(EXIT_FAILURE, "invalid value (`%s' near `%s')", arg, ptr);
+	}
+	if (max > 0 && result > max)
+	{
+		exit_with_message(EXIT_FAILURE, "option value too big: %s", arg);
+	}
+	if (result < min)
+	{
+		exit_with_message(EXIT_FAILURE, "option value too small: %s", arg);
+	}
+	return result;
+}
+
 static unsigned long bounded_strtoul_wrapper(char *arg, size_t max, size_t min)
 {
 	char *ptr;
@@ -68,7 +90,7 @@ void	get_count_option(char *arg, struct s_program_param *params)
 void	get_interval_option(char *arg, struct s_program_param *params)
 {
 	params->flags |= FTP_INTERVAL;
-	params->interval = bounded_strtoul_wrapper(arg, INTERVAL_MAX, INTERVAL_MIN);
+	params->interval = bounded_strtod_wrapper(arg, INTERVAL_MAX, INTERVAL_MIN);
 }
 
 void	get_pattern_option(char *arg, struct s_program_param *params)

@@ -92,7 +92,7 @@ struct s_timing {
 	struct timeval last_sent;
 	struct timeval present;
 	ssize_t usec_to_echo;
-	size_t effective_interval;
+	double effective_interval;
 	double answer_time;
 	double min;
 	double max;
@@ -125,7 +125,7 @@ struct s_program_param {
 	int preload;
 	int timeout;
 	int size;
-	int interval;
+	double interval;
 	int ttl;
 	int tos;
 	size_t count;
