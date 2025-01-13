@@ -78,6 +78,30 @@ void listen_echo_reply(struct s_program_param *params, struct s_ping *ping)
 		print_reply(params, ping);
 }
 
+void set_remaining_linger_time(struct s_program_param *params, struct s_ping *ping)
+{
+	ssize_t remaining_us;
+
+	gettimeofday(&ping->time.present, 0);
+	ping->time.select_timeout.tv_sec = params->linger + ping->time.last_sent.tv_sec - ping->time.present.tv_sec;
+	ping->time.select_timeout.tv_usec = ping->time.last_sent.tv_usec - ping->time.present.tv_usec;
+	while (ping->time.select_timeout.tv_usec < 0)
+	{
+		ping->time.select_timeout.tv_usec += 1000000;
+		ping->time.select_timeout.tv_sec --;
+	}
+	while (ping->time.select_timeout.tv_usec > 1000000)
+	{
+		ping->time.select_timeout.tv_usec -= 1000000;
+		ping->time.select_timeout.tv_sec ++;
+	}
+	if (ping->time.select_timeout.tv_sec < 0)
+	{
+		ping->time.select_timeout.tv_usec = 0;
+		ping->time.select_timeout.tv_sec = 0;
+	}
+}
+
 int do_select(struct s_program_param *params, struct s_ping *ping)
 {
 	fd_set fdset;
@@ -92,8 +116,17 @@ int do_select(struct s_program_param *params, struct s_ping *ping)
 	}
 	else if (status == LISTEN_ONCE)
 	{
-		ping->time.select_timeout.tv_sec = params->linger;
-		status = END_CURR_PINGING;
+		if (ping->answer_count >= ping->sequence)
+		{
+			status = END_CURR_PINGING;
+			return 0;
+		}
+		set_remaining_linger_time(params, ping);
+		if (ping->time.select_timeout.tv_sec == 0 && ping->time.select_timeout.tv_usec == 0)
+		{
+			status = END_CURR_PINGING;
+			return 0;
+		}
 	}
 	else if (ping->time.usec_to_echo > 0)
 		ping->time.select_timeout.tv_usec = ping->time.usec_to_echo;
@@ -185,9 +218,9 @@ void do_ping_loop(struct s_config *config)
 		if (errno != EINTR)
 	 		exit_wmsg_and_free(config, EXIT_FAILURE, "select failed");
 	}
-	else
+	else if (status == PINGING)
 	{
-		if (status == PINGING && (config->params.flags & FTP_FLOOD || interval_passed(&config->ping.time)))
+		if (config->params.flags & FTP_FLOOD || interval_passed(&config->ping.time))
 			send_echo_request(config, &config->params, &config->ping);
 		if (config->params.count && config->params.count <= config->ping.sequence)
 			status = LISTEN_ONCE;

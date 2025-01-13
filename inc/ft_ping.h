@@ -43,7 +43,7 @@
 # define FTP_IP_TIMESTAMP 0x10			// --ip-timestamp=FLAG					- NO
 # define FTP_QUIET 0x20					// -q --quiet							- IMPLEMENTED
 # define FTP_DEBUG 0x40					// -d --debug							- IMPLEMENTED
-# define FTP_INTERVAL 0x80			// Interval -i --interval=NUMBER 		- IMPLEMENTED
+# define FTP_INTERVAL 0x80				// Interval -i --interval=NUMBER 		- IMPLEMENTED
 
 // Defaults
 # define DEF_LINGER 10
