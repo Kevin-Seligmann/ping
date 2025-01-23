@@ -27,7 +27,7 @@
 # define PINGING 0
 
 // Options
-# define OPTIONS_COUNT 18
+# define OPTIONS_COUNT 18 - 2
 
 										// Help -? --help 						- IMPLEMENTED
 										// Version -V --version 				- IMPLEMENTED
@@ -39,14 +39,18 @@
 										// Count -c --count=NUMBER				- IMPLEMENTED
 										// -T --tos=N							- IMPLEMENETD
 										// --ttl=N								- IMPLEMENTED
-# define FTP_VERBOSE 0x1				// -v --verbose							- PARTIAL (Should expand when adding more options)
+# define FTP_VERBOSE 0x1				// -v --verbose							- IMPLEMENTED
 # define FTP_FLOOD 0x2					// -f --flood							- IMPLEMENETD
-# define FTP_NUMERIC 0x4				// -n --numeric							- NO (Useless w.o timestamp)
 # define FTP_BYPASS_ROUTING_TABLE 0x8	// -r --ignore-routing					- IMPLEMENTED
-# define FTP_IP_TIMESTAMP 0x10			// --ip-timestamp=FLAG					- NO
 # define FTP_QUIET 0x20					// -q --quiet							- IMPLEMENTED
 # define FTP_DEBUG 0x40					// -d --debug							- IMPLEMENTED
 # define FTP_INTERVAL 0x80				// Interval -i --interval=NUMBER 		- IMPLEMENTED
+
+// To be fair it's a little out of scope. I dont mind managing the different ip header sizes and options.
+// But there are more interesting projects than figuring out when and what to print about the timestamps and addresses.
+// The former is already implemented anyways, I will leave it commented.
+// # define FTP_IP_TIMESTAMP 0x10			// --ip-timestamp=FLAG					- NO
+// # define FTP_NUMERIC 0x4				// -n --numeric							- NO (Useless w.o timestamp)
 
 // Defaults
 # define DEF_LINGER 10
@@ -54,11 +58,11 @@
 # define DEF_INTERVAL 1
 
 // Ip timestamp options
-# define TSONLY_TS 0
-# define TSADDR_TS 1
+// # define TSONLY_TS 0
+// # define TSADDR_TS 1
 
-# define IPHDR_TSOPT_TYPE_CODE 0x44
-# define IP_TIMESTAMP_OPTION_OFFSET 5
+// # define IPHDR_TSOPT_TYPE_CODE 0x44
+// # define IP_TIMESTAMP_OPTION_OFFSET 5
 
 // Header sizes
 # define ICMP_HDR_SIZE 8

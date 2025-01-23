@@ -86,17 +86,17 @@ static void configurate_socket_failure_w_strerror(struct s_program_param *params
 	exit_with_message(EXIT_FAILURE, err_msg, strerror(err));
 }
 
-static void configurate_timestamp_option(struct s_program_param *params)
-{
-	uint8_t option[4];
+// static void configurate_timestamp_option(struct s_program_param *params)
+// {
+// 	uint8_t option[4];
 
-	option[0] = IPHDR_TSOPT_TYPE_CODE; // Type = TS; 0x44
-	option[1] = IP_HDR_MAX_SIZE; // Length (Max- 40 bytes)
-	option[2] = IP_TIMESTAMP_OPTION_OFFSET; // 5
-	option[3] = params->iptimestamp; // 0 or 1, meaning TS or TS and ADDR
-    if (setsockopt(params->socketfd, IPPROTO_IP, IP_OPTIONS, &option, sizeof(option)) < 0)
-		configurate_socket_failure_w_strerror(params, "%s: setsockopt(TIMESTAMP-OPTIONS)");
-}
+// 	option[0] = IPHDR_TSOPT_TYPE_CODE; // Type = TS; 0x44
+// 	option[1] = IP_HDR_MAX_SIZE; // Length (Max- 40 bytes)
+// 	option[2] = IP_TIMESTAMP_OPTION_OFFSET; // 5
+// 	option[3] = params->iptimestamp; // 0 or 1, meaning TS or TS and ADDR
+//     if (setsockopt(params->socketfd, IPPROTO_IP, IP_OPTIONS, &option, sizeof(option)) < 0)
+// 		configurate_socket_failure_w_strerror(params, "%s: setsockopt(TIMESTAMP-OPTIONS)");
+// }
 
 static void configurate_socket(struct s_program_param *params)
 {
@@ -119,8 +119,8 @@ static void configurate_socket(struct s_program_param *params)
 		configurate_socket_failure_w_strerror(params, "%s: setsockopt(TTL)");
 	if(params->tos > 0 && setsockopt(params->socketfd, IPPROTO_IP, IP_TOS, (void *) &(params->tos), sizeof(params->tos)) < 0)
 		configurate_socket_failure_w_strerror(params, "%s: setsockopt(TOS)");
-	if (params->flags & FTP_IP_TIMESTAMP)
-		configurate_timestamp_option(params);
+//	if (params->flags & FTP_IP_TIMESTAMP)
+//		configurate_timestamp_option(params);
 }
 
 static void set_ping_shared_configuration(struct s_program_param *params, struct s_ping *ping)

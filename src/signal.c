@@ -1,12 +1,12 @@
 #include "ft_ping.h"
 
-volatile sig_atomic_t status;
+volatile sig_atomic_t ft_ping_status;
 
 void handle_sigint(int signum)
 {
 	(void)signum;
 
-	status = END_ALL_PINGING;
+	ft_ping_status = END_ALL_PINGING;
 }
 
 void set_signal()
@@ -20,5 +20,5 @@ void set_signal()
 	{
 	exit_with_message(EXIT_FAILURE, "%s: signal", strerror(errno));
 	}
-	status = PINGING;
+	ft_ping_status = PINGING;
 }

@@ -1,6 +1,6 @@
 #include "ft_ping.h"
 
-extern volatile sig_atomic_t status;
+extern volatile sig_atomic_t ft_ping_status;
 
 uint16_t checksum(void *header, size_t size){
     uint32_t sum = 0;
@@ -114,17 +114,17 @@ int do_select(struct s_program_param *params, struct s_ping *ping)
 		ping->time.select_timeout.tv_sec = 0;
 		ping->time.select_timeout.tv_usec = 10000;
 	}
-	else if (status == LISTEN_ONCE)
+	else if (ft_ping_status == LISTEN_ONCE)
 	{
 		if (ping->answer_count >= ping->sequence)
 		{
-			status = END_CURR_PINGING;
+			ft_ping_status = END_CURR_PINGING;
 			return 0;
 		}
 		set_remaining_linger_time(params, ping);
 		if (ping->time.select_timeout.tv_sec == 0 && ping->time.select_timeout.tv_usec == 0)
 		{
-			status = END_CURR_PINGING;
+			ft_ping_status = END_CURR_PINGING;
 			return 0;
 		}
 	}
@@ -200,7 +200,7 @@ void check_timeout(struct s_program_param *params, struct s_ping *ping)
 		return ;
 	usec_since_start = (ping->time.present.tv_sec - ping->time.starting_time.tv_sec) * 1000000 + ping->time.present.tv_usec - ping->time.starting_time.tv_usec;
 	if (usec_since_start > (unsigned int) params->timeout * 1000000)
-		status = END_ALL_PINGING;
+		ft_ping_status = END_ALL_PINGING;
 }
 
 void do_ping_loop(struct s_config *config)
@@ -218,12 +218,12 @@ void do_ping_loop(struct s_config *config)
 		if (errno != EINTR)
 	 		exit_wmsg_and_free(config, EXIT_FAILURE, "select failed");
 	}
-	else if (status == PINGING)
+	else if (ft_ping_status == PINGING)
 	{
 		if (config->params.flags & FTP_FLOOD || interval_passed(&config->ping.time))
 			send_echo_request(config, &config->params, &config->ping);
 		if (config->params.count && config->params.count <= config->ping.sequence)
-			status = LISTEN_ONCE;
+			ft_ping_status = LISTEN_ONCE;
 	}
 	check_timeout(&config->params, &config->ping);
 }
@@ -247,7 +247,7 @@ void ping(struct s_config *config)
 	send_preload(config, &config->params, &config->ping);
 	send_echo_request(config, &config->params, &config->ping);
 	config->ping.time.effective_interval = config->params.interval;
- 	while (status == PINGING || status == LISTEN_ONCE)
+ 	while (ft_ping_status == PINGING || ft_ping_status == LISTEN_ONCE)
 		do_ping_loop(config);
 	print_result(&config->params, &config->ping);
 	freeaddrinfo(config->ping.addr);

@@ -1,6 +1,6 @@
 #include "ft_ping_main.h"
 
-extern volatile sig_atomic_t status;
+extern volatile sig_atomic_t ft_ping_status;
 
 void free_resources(struct s_config *config)
 {
@@ -18,8 +18,8 @@ static void run_pings(char **args, struct s_config *config)
 		{
 			config->ping.destination = *args;
 			ping(config);
-			if (status == END_CURR_PINGING)
-				status = PINGING;
+			if (ft_ping_status == END_CURR_PINGING)
+				ft_ping_status = PINGING;
 			config->params.destinations --;
 		}
 		args ++;
@@ -38,7 +38,3 @@ int main(int argc, char **argv)
 	free_resources(&config);
 	return EXIT_SUCCESS;
 }
-
-
-// TODO: Flip the order of messages with strerror.
-// TODO: Change global to only detect the signal

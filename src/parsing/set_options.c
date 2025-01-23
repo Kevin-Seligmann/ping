@@ -109,21 +109,21 @@ void	get_pattern_option(char *arg, struct s_program_param *params)
 	}
 }
 
-void	get_iptimestamp_option(char *arg, struct s_program_param *params)
-{
-	params->flags != FTP_IP_TIMESTAMP;
+// void	get_iptimestamp_option(char *arg, struct s_program_param *params)
+// {
+// 	params->flags != FTP_IP_TIMESTAMP;
 
-	if (strcasecmp(arg, "tsonly") == 0)
-	{
-		params->iptimestamp = TSONLY_TS;
-	}
-	else if (strcasecmp(arg, "tsaddr") == 0)
-	{
-		params->iptimestamp = TSADDR_TS;
-	}
-	else
-	{
-		exit_with_message(EXIT_FAILURE, "unsupported timestamp type: %s", arg);
-	}
-}
+// 	if (strcasecmp(arg, "tsonly") == 0)
+// 	{
+// 		params->iptimestamp = TSONLY_TS;
+// 	}
+// 	else if (strcasecmp(arg, "tsaddr") == 0)
+// 	{
+// 		params->iptimestamp = TSADDR_TS;
+// 	}
+// 	else
+// 	{
+// 		exit_with_message(EXIT_FAILURE, "unsupported timestamp type: %s", arg);
+// 	}
+// }
 
